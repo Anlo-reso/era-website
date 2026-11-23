@@ -6,7 +6,9 @@ All people, places, services and data in this prototype are made up.
 
 ## Open it
 
-Download or clone the repository and double-click `index.html`. An internet connection is needed for the fonts.
+**Live:** https://anlo-reso.github.io/era-website/
+
+Or locally: Download or clone the repository and double-click `index.html`. An internet connection is needed for the fonts.
 
 Or run a small local server:
 
