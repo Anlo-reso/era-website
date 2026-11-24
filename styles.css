@@ -915,3 +915,22 @@ dialog, .connect-dlg, .person-card, .tabbar { border-radius: var(--r-lg); }
 .map > svg .cb-road.thin { stroke-opacity: .4; stroke-width: 4; }
 .map > svg .cb-wall { fill: #fff; fill-opacity: .18; stroke-opacity: .55; stroke-width: 3; stroke-dasharray: 2 7; }
 .map > svg .cb-rail { stroke-opacity: .45; stroke-width: 2; stroke-dasharray: 10 6; }
+
+/* ===== Overview (home): your preparedness and to-do list next to what's coming up ===== */
+.ov-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; padding: 8px 0 20px; }
+.ov-head .lead { margin-top: 4px; }
+.ov-ask { display: flex; align-items: center; gap: 12px; width: min(460px, 100%); padding: 8px 8px 8px 8px; background: #fff; border: 1.5px solid #E8E6E7; border-radius: var(--r); }
+.ov-ask:focus-within { border-color: var(--blue); }
+.ov-ask .bot { width: 44px; height: 44px; flex: none; display: grid; place-items: center; background: #E8E6E7; border-radius: var(--r); box-shadow: none; }
+.ov-ask .bot::after { display: none; }
+.ov-ask .bot img { width: 30px; height: auto; display: block; }
+.ov-ask input { flex: 1; min-width: 0; border: 0; background: none; font: inherit; font-size: .95rem; color: var(--charcoal); outline: none; }
+.ov-ask input::placeholder { color: rgba(47, 47, 47, .7); }
+.ov-ask .send { flex: none; width: 45px; height: 45px; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; }
+.ov-ask .send img { display: block; }
+.ov.fam-side { flex-direction: row; gap: 24px; height: calc(100vh - var(--head-h) - 150px); min-height: 520px; }
+.ov.fam-side > .list-card { flex: 1 1 0; }
+@media (max-width: 1020px) {
+  .ov.fam-side { flex-direction: column; height: auto; }
+  .ov.fam-side > .list-card { flex: none; overflow: visible; }
+}

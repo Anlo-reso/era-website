@@ -1,5 +1,5 @@
 /* era website — clickable prototype with made-up example data.
-   Routes: #/login · #/family[/<person> | /svc-<service>] · #/steps · #/services[/<id> | /search] · #/help · #/privacy */
+   Routes: #/login · #/overview (home) · #/family[/<person> | /svc-<service>] · #/services[/<id>] · #/steps (assistant) · #/help */
 (() => {
   'use strict';
   const $ = (s, el = document) => el.querySelector(s);
@@ -165,6 +165,19 @@
     return `<svg class="${enter ? 'enter' : ''}" role="group" aria-label="Map of Rosa's family around you"><defs>${defs}</defs>${s}<g class="svc-tags" aria-hidden="true">${tags}</g></svg>`;
   }
 
+  function overviewPage() {
+    return `
+    <section class="ov-head">
+      <div><h1 class="h1">Overview</h1><p class="lead">How prepared you are for Rosa's care, and what is coming up.</p></div>
+      <form class="ov-ask" data-ask>
+        <span class="bot" aria-hidden="true"><img src="assets/ui/bot-face.svg" width="53.3439" height="42.0934" alt=""></span>
+        <label class="sr-only" for="ovAsk">Ask era</label>
+        <input id="ovAsk" type="text" placeholder="how can I help you?" autocomplete="off">
+        <button class="send" type="submit" aria-label="Ask"><img src="assets/ui/send.svg" width="45" height="45" alt=""></button>
+      </form>
+    </section>
+    <div class="ov fam-side" id="ovSide">${overview('Coming up')}</div>`;
+  }
   function family() {
     return `
     <div class="fam">
@@ -196,12 +209,12 @@
     ['December', 'Tue 8', 'Cardiologist — heart check, 9:30', 'Rosa'],
     ['December', 'Every Wed', 'Sofia visits Nonna', 'Tech help with the phone'],
   ];
-  function overview() {
+  function overview(title = 'Overview') {
     const months = [...new Set(EVENTS.map((e) => e[0]))];
     return `
       ${prepCard()}
       <section class="list-card fam-over" aria-label="Overview">
-        <div class="list-head"><h2>Overview</h2><span>later this year</span></div>
+        <div class="list-head"><h2>${title}</h2><span>later this year</span></div>
         ${state.active.length ? `<div class="grp"><p class="grp-t">Services for Rosa</p>${activeList()}</div>` : ''}
         ${months.map((m) => `<div class="grp"><p class="grp-t">${m}</p><ul class="events">${EVENTS.filter((e) => e[0] === m).map(([, day, what, who]) => `
           <li><span class="ev-day">${esc(day)}</span><span><span class="ev-what">${esc(what)}</span><span class="ev-who">${esc(who)}</span></span></li>`).join('')}</ul></div>`).join('')}
@@ -422,22 +435,6 @@
     e.preventDefault(); cancelAnimationFrame(viewAnim);
     const mb = mapBox(); view = clampView({ x: (view ? view.x : 0) + e.deltaX / mb.z, y: (view ? view.y : 0) + e.deltaY / mb.z }, mb); applyView();
   }, { passive: false });
-
-  /* ---------- privacy ---------- */
-  function privacy() {
-    return `
-    <section class="page-head"><h1 class="h1">Privacy Policy</h1><p class="lead">era is a public service. Your family's information belongs to you.</p></section>
-    <div class="grid">
-      <article class="card c7" style="box-shadow:var(--shadow)">
-        <ul class="lines">
-          <li>Rosa decides what is shared, and with whom. She can change it at any time.</li>
-          <li>Only people Rosa connected can see her information. Lucia sees the emergency sheet only.</li>
-          <li>Care advisors see Rosa's information only during a call you started.</li>
-          <li>era never sells data and shows no advertising.</li>
-        </ul>
-      </article>
-    </div>`;
-  }
 
   /* ---------- your steps (scripted assistant + checklist) ---------- */
   const ANSWERS = [
@@ -703,8 +700,8 @@
   }
 
   /* ---------- routing ---------- */
-  const PAGES = { login, family, steps, services, help, privacy };
-  const TITLES = { login: 'Welcome', family: "Rosa's family", steps: 'Your steps', services: 'Services', help: 'Help desk', privacy: 'Privacy Policy' };
+  const PAGES = { login, overview: overviewPage, family, steps, services, help };
+  const TITLES = { login: 'Welcome', overview: 'Overview', family: "Rosa's family", steps: 'era assistant', services: 'Services', help: 'Help desk' };
   function render() {
     const [route0, sub] = location.hash.replace(/^#\/?/, '').split('/');
     const route = PAGES[route0] ? route0 : 'login';
@@ -714,12 +711,13 @@
     document.title = 'era – ' + TITLES[route];
     $('#main').innerHTML = PAGES[route](sub);
     if (route === 'steps') { renderChat(); renderList(); if (pending) { const q = pending; pending = null; ask(q); } }
-    if (route === 'services') { renderServices(); if (sub === 'search') $('#svcSearch')?.focus(); else if (sub) $('#svc-' + sub)?.scrollIntoView({ block: 'center' }); }
+    if (route === 'services') { renderServices(); if (sub) $('#svc-' + sub)?.scrollIntoView({ block: 'center' }); }
     if (route === 'login') playIntro(); else stopIntro();
     if (route === 'family') { view = null; applyView(); renderList(); }
     window.scrollTo(0, 0);
   }
   function refreshFamily() {
+    if ($('#ovSide')) { const sc = $('.prep-card')?.scrollTop || 0; $('#ovSide').innerHTML = overview('Coming up'); if ($('.prep-card')) $('.prep-card').scrollTop = sc; return; }
     if (!location.hash.startsWith('#/family')) return;
     $('#map').innerHTML = mapSVG(); applyView();
     const sc = $('.prep-card')?.scrollTop || 0;   // keep your place in your list while ticking
@@ -801,7 +799,7 @@
     e.preventDefault();
     const f = e.target;
     if (f.dataset.connectform) { const id = f.dataset.connectform; if (!state.connected.includes(id)) { state.connected.push(id); save(); } $('#connectDlg').close(); refreshFamily(); mapToast(id); return; }
-    if (f.id === 'loginForm') { location.hash = '#/family'; return; }
+    if (f.id === 'loginForm') { location.hash = '#/overview'; return; }
     if (f.id === 'chatForm') { const i = $('#q'); ask(i.value); i.value = ''; return; }
     if (f.dataset.ask !== undefined) { const v = $('input', f).value.trim(); if (v) { pending = v; location.hash = '#/steps'; } }
   });
