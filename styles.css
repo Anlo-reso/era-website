@@ -707,3 +707,12 @@ body.is-login main { padding: 0; }
 .cd-note { text-align: center; font-size: .78rem; }
 .map > svg .route { stroke-width: 12; }
 .map > svg .route-flow { stroke-opacity: .55; stroke-width: 4; }
+
+/* ---------- Material Symbols (Outlined, 400, fill 0) ----------
+   Icons are filled shapes, not strokes: colour them with `color`. */
+svg.ms, svg.ms path { fill: currentColor !important; stroke: none !important; }
+.map > svg .stop .stop-ico { color: var(--charcoal); }
+#svcMap .m-stop .m-ico { color: var(--charcoal); }
+#svcMap .m-stop.on .m-ico { color: #fff; }
+#svcMap .m-ico-b { color: var(--blue); }
+.it .box svg { color: #fff; }

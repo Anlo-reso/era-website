@@ -9,21 +9,22 @@
     get(k, d) { try { const v = localStorage.getItem('era2:' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
     set(k, v) { try { localStorage.setItem('era2:' + k, JSON.stringify(v)); } catch (e) { /* fine */ } },
   };
+  // Material Symbols Outlined (weight 400, fill 0, 24px) — fonts.google.com/icons
   const I = {
-    arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
-    back: '<path d="M19 12H5M11 6l-6 6 6 6"/>',
-    food: '<path d="M6 3v8a2 2 0 0 0 4 0V3M8 11v10M16 3c-1.7 0-3 2-3 5s1.3 4 3 4v9"/>',
-    car: '<path d="M5 16v-5l2-5h10l2 5v5M5 16h14M5 16v2M19 16v2"/><circle cx="8" cy="13.5" r=".6"/><circle cx="16" cy="13.5" r=".6"/>',
-    hand: '<path d="M7 11V6.5a1.5 1.5 0 0 1 3 0V11M10 10V4.5a1.5 1.5 0 0 1 3 0V10M13 10V5.5a1.5 1.5 0 0 1 3 0V12M16 9.5a1.5 1.5 0 0 1 3 0V14a7 7 0 0 1-7 7h-1a6 6 0 0 1-5-2.7L3.5 15a1.5 1.5 0 0 1 2.4-1.8L7 14.5"/>',
-    home: '<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
-    msg: '<path d="M4 5h16v11H9l-5 4z"/>',
-    phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"/>',
-    check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
-    search: '<circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/>',
-    pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
-    cross: '<path d="M10 4h4v6h6v4h-6v6h-4v-6H4v-4h6z"/>',
+    arrow: '<path d="M647-440H160v-80h487L423-744l57-56 320 320-320 320-57-56 224-224Z"/>',  // arrow_forward
+    back: '<path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/>',  // arrow_back
+    food: '<path d="M280-80v-366q-51-14-85.5-56T160-600v-280h80v280h40v-280h80v280h40v-280h80v280q0 56-34.5 98T360-446v366h-80Zm400 0v-320H560v-280q0-83 58.5-141.5T760-880v800h-80Z"/>',  // restaurant
+    car: '<path d="M240-200v40q0 17-11.5 28.5T200-120h-40q-17 0-28.5-11.5T120-160v-320l84-240q6-18 21.5-29t34.5-11h440q19 0 34.5 11t21.5 29l84 240v320q0 17-11.5 28.5T800-120h-40q-17 0-28.5-11.5T720-160v-40H240Zm-8-360h496l-42-120H274l-42 120Zm-32 80v200-200Zm100 160q25 0 42.5-17.5T360-380q0-25-17.5-42.5T300-440q-25 0-42.5 17.5T240-380q0 25 17.5 42.5T300-320Zm360 0q25 0 42.5-17.5T720-380q0-25-17.5-42.5T660-440q-25 0-42.5 17.5T600-380q0 25 17.5 42.5T660-320Zm-460 40h560v-200H200v200Z"/>',  // directions_car
+    hand: '<path d="M480-480v-400q0-17 11.5-28.5T520-920q17 0 28.5 11.5T560-880v400h-80Zm-160 0v-360q0-17 11.5-28.5T360-880q17 0 28.5 11.5T400-840v360h-80ZM500-40q-142 0-241-99t-99-241v-380q0-17 11.5-28.5T200-800q17 0 28.5 11.5T240-760v380q0 109 75.5 184.5T500-120q109 0 184.5-75.5T760-380v-140q-17 0-28.5 11.5T720-480v160H600q-33 0-56.5 23.5T520-240v40h-80v-40q0-66 47-113t113-47h40v-400q0-17 11.5-28.5T680-840q17 0 28.5 11.5T720-800v207q10-3 19.5-5t20.5-2h80v220q0 142-99 241T500-40Zm40-320Z"/>',  // front_hand
+    home: '<path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z"/>',  // home
+    msg: '<path d="M240-400h320v-80H240v80Zm0-120h480v-80H240v80Zm0-120h480v-80H240v80ZM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z"/>',  // chat
+    phone: '<path d="M798-120q-125 0-247-54.5T329-329Q229-429 174.5-551T120-798q0-18 12-30t30-12h162q14 0 25 9.5t13 22.5l26 140q2 16-1 27t-11 19l-97 98q20 37 47.5 71.5T387-386q31 31 65 57.5t72 48.5l94-94q9-9 23.5-13.5T670-390l138 28q14 4 23 14.5t9 23.5v162q0 18-12 30t-30 12ZM241-600l66-66-17-94h-89q5 41 14 81t26 79Zm358 358q39 17 79.5 27t81.5 13v-88l-94-19-67 67ZM241-600Zm358 358Z"/>',  // call
+    check: '<path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"/>',  // check
+    search: '<path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>',  // search
+    pin: '<path d="M536.5-503.5Q560-527 560-560t-23.5-56.5Q513-640 480-640t-56.5 23.5Q400-593 400-560t23.5 56.5Q447-480 480-480t56.5-23.5ZM480-186q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z"/>',  // location_on
+    cross: '<path d="M120-120v-80l80-240-80-240v-80h508l58-160 94 34-46 126h106v80l-80 240 80 240v80H120Zm320-160h80v-120h120v-80H520v-120h-80v120H320v80h120v120Zm-236 80h552l-80-240 80-240H204l80 240-80 240Zm276-240Z"/>',  // local_pharmacy
   };
-  const icon = (n) => `<svg viewBox="0 0 24 24" aria-hidden="true">${I[n]}</svg>`;
+  const icon = (n) => `<svg class="ms" viewBox="0 -960 960 960" aria-hidden="true">${I[n]}</svg>`;
 
   /* ---------- people (photos from the team's Figma) ---------- */
   const PEOPLE = {
@@ -141,7 +142,7 @@
       return `
       <g class="stop" role="button" tabindex="0" data-stop="${k}" aria-label="${v.label}">
         <circle cx="${v.x}" cy="${v.y}" r="${r}"/>
-        <svg x="${v.x - ic / 2}" y="${v.y - ic / 2}" width="${ic}" height="${ic}" viewBox="0 0 24 24" class="stop-ico">${I[k]}</svg>
+        <svg x="${v.x - ic / 2}" y="${v.y - ic / 2}" width="${ic}" height="${ic}" viewBox="0 -960 960 960" class="stop-ico ms">${I[k]}</svg>
         ${small ? '' : `<text x="${v.x}" y="${v.y + 48}" font-size="${ss}" text-anchor="middle">${v.label}</text>`}
       </g>`;
     }).join('');
@@ -481,14 +482,14 @@
       <text class="m-city" x="150" y="56">BERGAMO</text>
       ${sel ? `<path class="m-route" d="M380 430 L ${sel.x} ${sel.y}"/>` : ''}
       ${SVC.map((s) => { const on = sel && sel.id === s.id; const r = on ? 32 : 28; return `<g class="m-stop ${on ? 'on' : ''} ${vis.has(s.id) ? '' : 'dim'}" data-svcsel="${s.id}" role="button" tabindex="0" aria-label="${s.name}, ${s.dist}">
-        <circle cx="${s.x}" cy="${s.y}" r="${r}"/><svg x="${s.x - 12}" y="${s.y - 12}" width="24" height="24" viewBox="0 0 24 24" class="m-ico">${I[s.icon]}</svg>
+        <circle cx="${s.x}" cy="${s.y}" r="${r}"/><svg x="${s.x - 12}" y="${s.y - 12}" width="24" height="24" viewBox="0 -960 960 960" class="m-ico ms">${I[s.icon]}</svg>
         <rect x="${s.x - lw(s.who, 13) / 2}" y="${s.y + r + 8}" width="${lw(s.who, 13)}" height="24" rx="12"/><text x="${s.x}" y="${s.y + r + 24}" text-anchor="middle">${s.who}</text></g>`; }).join('')}
       ${sel ? (() => { const wx = sel.x + (380 - sel.x) * 0.6, wy = sel.y + (430 - sel.y) * 0.6 - 26; return `<g class="m-walk"><rect x="${wx - lw(sel.walk, 13) / 2}" y="${wy - 12}" width="${lw(sel.walk, 13)}" height="24" rx="12"/><text x="${wx}" y="${wy + 5}" text-anchor="middle">${sel.walk}</text></g>`; })() : ''}
       <defs><clipPath id="clip-home"><circle cx="380" cy="430" r="48"/></clipPath></defs>
       <circle class="m-home-ring" cx="380" cy="430" r="53"/>
       <image href="${PEOPLE.rosa.photo}" x="332" y="382" width="96" height="96" clip-path="url(#clip-home)" preserveAspectRatio="xMidYMid slice"/>
       <g class="m-home-l"><rect x="318" y="492" width="124" height="28" rx="14"/><text x="390" y="511" text-anchor="middle">Rosa's home</text>
-        <svg x="326" y="499" width="14" height="14" viewBox="0 0 24 24" class="m-ico-b">${I.home}</svg></g>
+        <svg x="326" y="499" width="14" height="14" viewBox="0 -960 960 960" class="m-ico-b ms">${I.home}</svg></g>
     </svg>`;
   }
 
