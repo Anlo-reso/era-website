@@ -667,8 +667,8 @@ svg.ms, svg.ms path { fill: currentColor !important; stroke: none !important; }
 /* ===== Figma "connected + details" (branding_era, node 320:2211), frame 1728 × 1117 =====
    header 180px tall · grey family panel · right column 452px with "Your list" and "Overview" */
 :root { --head-h: clamp(84px, 10.4vw, 180px); }
-.wrap { max-width: 1728px; padding: 0 clamp(16px, 2.5vw, 43px); }
-.top .wrap { padding: 0 clamp(16px, 4.2vw, 72px); }
+.wrap { max-width: 1728px; padding: 0 clamp(16px, 4vw, 69px); }
+.top .wrap { padding: 0 clamp(16px, 4.5vw, 78px); }
 .top .top-in { min-height: var(--head-h); gap: clamp(16px, 2.1vw, 36px); }
 .logo img { width: 86.4px; height: 54px; }
 .top .nav { gap: clamp(14px, 2.3vw, 40px); }
