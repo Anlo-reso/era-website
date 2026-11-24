@@ -915,3 +915,14 @@ dialog, .connect-dlg, .person-card, .tabbar { border-radius: var(--r-lg); }
 .map > svg .cb-road.thin { stroke-opacity: .4; stroke-width: 4; }
 .map > svg .cb-wall { fill: #fff; fill-opacity: .18; stroke-opacity: .55; stroke-width: 3; stroke-dasharray: 2 7; }
 .map > svg .cb-rail { stroke-opacity: .45; stroke-width: 2; stroke-dasharray: 10 6; }
+
+/* Services page: white tiles with a light outline */
+.svc2 { background: #fff; border: 1.5px solid #E8E6E7; }
+.svc2:hover { border-color: rgba(47, 47, 47, .2); }
+.svc2 .active-pill { background: rgba(91, 117, 254, .08); }
+.svc2 .ask-btn:hover { background: rgba(91, 117, 254, .08); }
+/* streets a step quieter, so the family lines stand out */
+.map > svg .cb-road { stroke-opacity: .32; }
+.map > svg .cb-road.thin { stroke-opacity: .26; }
+.map > svg .cb-wall { stroke-opacity: .4; fill-opacity: .12; }
+.map > svg .cb-rail { stroke-opacity: .3; }

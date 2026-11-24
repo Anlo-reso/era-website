@@ -27,15 +27,14 @@
 
   /* ---------- people (photos from the team's Figma) ---------- */
   const PEOPLE = {
-    rosa:   { name: 'Rosa',   role: 'Mum',           full: 'Rosa Bianchi',  born: '10.11.1948', photo: 'assets/people/rosa.jpg' },
-    giulia: { name: 'Andrea', role: 'You',           full: 'Andrea Bianchi', born: '02.04.1975', photo: 'assets/people/giulia.jpg' },
+    rosa:   { name: 'Andrea', role: 'Dad',           full: 'Andrea Balloni', born: '14.03.1955', photo: 'assets/people/andrea.jpg' },
+    giulia: { name: 'Isa',    role: 'You',           full: 'Isa Bianchi',    born: '02.04.1975', photo: 'assets/people/giulia.jpg' },
     marco:  { name: 'Marco',  role: 'Brother',       full: 'Marco Bolognini', born: '19.07.1972', photo: 'assets/people/marco.jpg' },
     sofia:  { name: 'Sofia',  role: 'Granddaughter', full: 'Sofia Rossi',   born: '30.01.2005', photo: 'assets/people/sofia.jpg' },
-    lucia:  { name: 'Lucia',  role: 'Neighbour',     full: 'Lucia Conti',   born: '',           photo: null },
   };
   const SERVICE_DONE = {
-    food: { soon: 'tomorrow 12:00', text: 'Lunch delivery — Pranzo a Casa', when: 'Every day at 12:00 · starts tomorrow', toast: 'Lunch is ordered for Rosa. It arrives tomorrow at 12:00.' },
-    drive: { soon: 'Thu 9:30', text: 'Driving service — Bus Amico', when: 'Thu 26 Nov · pick-up 9:30 to Dr. Ferri', toast: 'A driver picks Rosa up on Thursday at 9:30.' },
+    food: { soon: 'tomorrow 12:00', text: 'Lunch delivery — Pranzo a Casa', when: 'Every day at 12:00 · starts tomorrow', toast: 'Lunch is ordered for Andrea. It arrives tomorrow at 12:00.' },
+    drive: { soon: 'Thu 9:30', text: 'Driving service — Bus Amico', when: 'Thu 26 Nov · pick-up 9:30 to Dr. Ferri', toast: 'A driver picks Andrea up on Thursday at 9:30.' },
     assist: { soon: 'Mon 9:00', text: 'Daily care assistant — Casa Serena', when: 'First visit Mon 30 Nov · 9:00', toast: 'Casa Serena will call you to plan the first visit.' },
     funding: { soon: 'in review', text: 'Home adjustment funding', when: 'Application started · a care advisor checks it', toast: 'Your funding application is started. A care advisor will call you.' },
   };
@@ -49,18 +48,17 @@
   const MAPP = {
     giulia: { x: 0, y: 0, r: 78, where: 'Milano' },
     rosa:   { x: -360, y: -300, r: 66, where: 'Bergamo · 50 min' },
-    lucia:  { x: -730, y: -250, r: 46, where: 'Bergamo · 50 min' },
     sofia:  { x: 360, y: -320, r: 56, where: 'Bergamo · 55 min' },
     marco:  { x: -600, y: 190, r: 58, where: 'Bergamo · 50 min' },
   };
-  const FAM_LINKS = [['giulia', 'rosa'], ['giulia', 'sofia'], ['giulia', 'marco'], ['rosa', 'lucia'], ['rosa', 'sofia'], ['rosa', 'marco']];
-  const PEOPLE_ORDER = ['giulia', 'rosa', 'sofia', 'marco', 'lucia'];   // the order they appear in
-  // Rosa's services sit on her line to the person who looks after them: [line from, line to, how far along, who is part of it]
+  const FAM_LINKS = [['giulia', 'rosa'], ['giulia', 'sofia'], ['giulia', 'marco'], ['rosa', 'sofia'], ['rosa', 'marco']];
+  const PEOPLE_ORDER = ['giulia', 'rosa', 'sofia', 'marco'];   // the order they appear in
+  // Andrea's services, placed where they are around his home; `people` = who in the family looks after each one
   const MAP_SVC = {
-    food:    { name: 'Food delivery', icon: 'food', on: ['giulia', 'rosa', 0.33], people: ['giulia', 'rosa'] },
-    assist:  { name: 'Day care assistant', icon: 'hand', on: ['rosa', 'sofia', 0.5], people: ['sofia', 'rosa'] },
-    drive:   { name: 'Driving assistant', icon: 'car', on: ['rosa', 'marco', 0.5], people: ['marco', 'rosa'] },
-    funding: { name: 'Home adjustments', icon: 'home', on: ['rosa', 'marco', 0.74], people: ['marco', 'rosa'] },
+    food:    { name: 'Food delivery', icon: 'food', at: { x: -560, y: -440 }, people: ['giulia', 'rosa'] },
+    assist:  { name: 'Day care assistant', icon: 'hand', at: { x: -600, y: -150 }, people: ['sofia', 'rosa'] },
+    drive:   { name: 'Driving assistant', icon: 'car', at: { x: -150, y: -210 }, people: ['marco', 'rosa'] },
+    funding: { name: 'Home adjustments', icon: 'home', at: { x: -150, y: -470 }, people: ['marco', 'rosa'] },
   };
   let selected = null, selSvc = null;   // the person or the service you tapped
   const at = (k) => MAPP[k];
@@ -78,9 +76,8 @@
     return [a, b].some((x) => x !== 'rosa' && !hasLink('giulia', x) && !isConnected(x));
   };
   const svcOf = (id) => Object.keys(MAP_SVC).filter((k) => MAP_SVC[k].people.includes(id));
-  const lineHl = (a, b) => (selected || selSvc) && (selSvc ? [selSvc] : svcOf(selected)).some((k) => { const [x, y] = MAP_SVC[k].on; return (x === a && y === b) || (x === b && y === a); });
   const hasLink = (a, b) => FAM_LINKS.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
-  // from you to the person you picked: directly, or through Rosa
+  // from you to the person you picked: directly, or through Andrea
   const routeTo = (id) => (id === 'giulia' ? '' : hasLink('giulia', id) ? link('giulia', id) : link('giulia', 'rosa') + ' ' + link('rosa', id));
   const textW = (s, size) => s.length * size * 0.52;
   const PIN = 'M536.5-503.5Q560-527 560-560t-23.5-56.5Q513-640 480-640t-56.5 23.5Q400-593 400-560t23.5 56.5Q447-480 480-480t56.5-23.5ZM480-186q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z';
@@ -116,7 +113,7 @@
     // lines to people you are not connected with yet are still and dotted, with a question mark half-way
     const k2q = small ? 1.6 : 1 / z, dots = `stroke-dasharray:0 ${(8 * k2q).toFixed(1)};stroke-width:${(3.5 * k2q).toFixed(1)}`;
     s += `<g class="links">${FAM_LINKS.map(([a, b], i) => { const nc = notYet(a, b);
-      return `<path class="link ${nc ? 'pending' : ''} ${lineHl(a, b) ? 'hl' : ''}" d="${link(a, b)}" ${nc ? `style="${dots}"` : `pathLength="1" style="--i:${i}"`}/>`; }).join('')}</g>`;
+      return `<path class="link ${nc ? 'pending' : ''}" d="${link(a, b)}" ${nc ? `style="${dots}"` : `pathLength="1" style="--i:${i}"`}/>`; }).join('')}</g>`;
     // the route to the person you picked: drawn solid, or dotted while you are not connected yet
     if (selected) {
       const d = routeTo(selected), nc = !isConnected(selected);
@@ -128,7 +125,7 @@
     const mine = selSvc ? [selSvc] : selected ? svcOf(selected) : [];
     let tags = '';   // names, drawn last so nothing covers them; shown on hover or keyboard focus
     s += Object.entries(MAP_SVC).map(([k, v]) => {
-      const { x, y } = alongLink(...v.on), on = isActive(k), hl = mine.includes(k), dim = (selected || selSvc) && !hl;
+      const { x, y } = v.at, on = isActive(k), hl = mine.includes(k), dim = (selected || selSvc) && !hl;
       const k2 = small ? 1.6 : 1 / z;   // on phones the map is tiny, so services scale with the faces instead of staying a fixed pixel size
       const r = (hl ? 21 : 18) * k2, ic = (hl ? 22 : 19) * k2, label = `${v.name}${on ? ' · Active' : ''}`, fs = u(12), lw = textW(label, fs) + fs * 1.8, lh = fs * 2;
       if (!small) tags += `<g class="svc-tag" id="tag-${k}"><rect x="${x - lw / 2}" y="${y - r - u(8) - lh}" width="${lw}" height="${lh}" rx="${lh / 2}"/><text x="${x}" y="${y - r - u(8) - lh / 2 + fs * 0.36}" font-size="${fs}" text-anchor="middle">${esc(label)}</text></g>`;
@@ -162,14 +159,14 @@
           <text x="${px + ic + ls * 0.35}" y="${pc + ls * 0.36}" font-size="${ls}">${esc(p.where)}</text></g>`}
       </g>`;
     }).join('');
-    return `<svg class="${enter ? 'enter' : ''}" role="group" aria-label="Map of Rosa's family around you"><defs>${defs}</defs>${s}<g class="svc-tags" aria-hidden="true">${tags}</g></svg>`;
+    return `<svg class="${enter ? 'enter' : ''}" role="group" aria-label="Map of Andrea's family around you"><defs>${defs}</defs>${s}<g class="svc-tags" aria-hidden="true">${tags}</g></svg>`;
   }
 
   function family() {
     return `
     <div class="fam">
-      <section class="fam-map" aria-label="Rosa's family">
-        <p class="panel-title">Rosa's circle of care · 5 people</p>
+      <section class="fam-map" aria-label="Andrea's family">
+        <p class="panel-title">Andrea's family · 4 people</p>
         <div class="map" id="map">${mapSVG(true)}</div>
         <div class="map-toast" id="mapToast" role="status" aria-live="polite"></div>
         <div class="ask">
@@ -191,10 +188,10 @@
 
   // what is coming up for the family, grouped by month
   const EVENTS = [
-    ['November', 'Thu 26', 'Dr. Ferri (GP) — check-up, 10:00', 'You go with Rosa'],
-    ['December', 'Fri 4', 'Notary — power of attorney, 15:00', 'Marco goes with Rosa'],
-    ['December', 'Tue 8', 'Cardiologist — heart check, 9:30', 'Rosa'],
-    ['December', 'Every Wed', 'Sofia visits Nonna', 'Tech help with the phone'],
+    ['November', 'Thu 26', 'Dr. Ferri (GP) — check-up, 10:00', 'You go with Andrea'],
+    ['December', 'Fri 4', 'Notary — power of attorney, 15:00', 'Marco goes with Andrea'],
+    ['December', 'Tue 8', 'Cardiologist — heart check, 9:30', 'Andrea'],
+    ['December', 'Every Wed', 'Sofia visits Nonno', 'Tech help with the phone'],
   ];
   function overview() {
     const months = [...new Set(EVENTS.map((e) => e[0]))];
@@ -202,7 +199,7 @@
       ${prepCard()}
       <section class="list-card fam-over" aria-label="Overview">
         <div class="list-head"><h2>Overview</h2><span>later this year</span></div>
-        ${state.active.length ? `<div class="grp"><p class="grp-t">Services for Rosa</p>${activeList()}</div>` : ''}
+        ${state.active.length ? `<div class="grp"><p class="grp-t">Services for Andrea</p>${activeList()}</div>` : ''}
         ${months.map((m) => `<div class="grp"><p class="grp-t">${m}</p><ul class="events">${EVENTS.filter((e) => e[0] === m).map(([, day, what, who]) => `
           <li><span class="ev-day">${esc(day)}</span><span><span class="ev-what">${esc(what)}</span><span class="ev-who">${esc(who)}</span></span></li>`).join('')}</ul></div>`).join('')}
       </section>`;
@@ -211,43 +208,42 @@
   // Person card, as on the Figma board:
   //  · connected   → banner, name, relation, address, upcoming appointments, important documents, (sharing), "View details"
   //  · not yet     → banner, name, relation, address, sharing, big "Connect with brother Marco" → pop-up → "now connected"
-  const REL = { rosa: ['Your Mother', 'mum'], giulia: ['You', ''], marco: ['Your brother', 'brother'], sofia: ["Rosa's granddaughter", ''], lucia: ["Rosa's neighbour", 'neighbour'] };
-  const ADDR = { rosa: 'Via Pignolo 12, Bergamo · 50 min from you', giulia: 'Milano · your home', marco: 'Via Tasso 8, Bergamo · 50 min from you', sofia: 'Bergamo · 55 min from you', lucia: 'Via Pignolo 14, Bergamo · next door to Rosa' };
-  const SHARE = { rosa: ['giulia', 'marco'], giulia: ['rosa', 'marco'], marco: ['sofia', 'giulia'], sofia: ['rosa', 'giulia'], lucia: [] };
+  const REL = { rosa: ['Your Father', 'dad'], giulia: ['You', ''], marco: ['Your brother', 'brother'], sofia: ["Andrea's granddaughter", ''] };
+  const ADDR = { rosa: 'Via Pignolo 12, Bergamo · 50 min from you', giulia: 'Milano · your home', marco: 'Via Tasso 8, Bergamo · 50 min from you', sofia: 'Bergamo · 55 min from you' };
+  const SHARE = { rosa: ['giulia', 'marco'], giulia: ['rosa', 'marco'], marco: ['sofia', 'giulia'], sofia: ['rosa', 'giulia'] };
   const FOCUS = { rosa: '50% 42%', giulia: '50% 38%', marco: '50% 30%', sofia: '50% 62%' }; // where the face sits in each photo
-  const INSURED = { rosa: true, giulia: true, marco: true, sofia: true, lucia: false };
-  const APPTS = { rosa: [['Tue 8 Dec', 'Cardiologist, 9:30'], ['Thu 26 Nov', 'Dr. Ferri (GP), 10:00']], giulia: [['Thu 26 Nov', 'Goes with Rosa to Dr. Ferri']], marco: [['Tue 8 Dec', 'Cardiologist, 9:30'], ['Thu 26 Nov', 'Dr. Ferri (GP), 10:00']], sofia: [['Every Wed', 'Visits Nonna · tech help']], lucia: [] };
+  const INSURED = { rosa: true, giulia: true, marco: true, sofia: true };
+  const APPTS = { rosa: [['Tue 8 Dec', 'Cardiologist, 9:30'], ['Thu 26 Nov', 'Dr. Ferri (GP), 10:00']], giulia: [['Thu 26 Nov', 'Goes with Andrea to Dr. Ferri']], marco: [['Tue 8 Dec', 'Cardiologist, 9:30'], ['Thu 26 Nov', 'Dr. Ferri (GP), 10:00']], sofia: [['Every Wed', 'Visits Nonno · tech help']] };
   const DOCS_FULL = ['Health insurance card', 'Medical Prescription', 'Living will', 'Report • Doctor’s appointment • 12/12/10'];
-  const DOCS = { rosa: DOCS_FULL, giulia: ['Health insurance card'], marco: DOCS_FULL, sofia: ['Health insurance card'], lucia: ["Rosa's emergency sheet"] };
-  // silent reset: every refresh starts with only Rosa (and you) connected, so the connect demo can be shown again
+  const DOCS = { rosa: DOCS_FULL, giulia: ['Health insurance card'], marco: DOCS_FULL, sofia: ['Health insurance card'] };
+  // silent reset: every refresh starts with only Andrea (and you) connected, so the connect demo can be shown again
   state.connected = ['rosa', 'giulia'];
   // …and with lunch delivery and the driving assistant active, so both service states are on the map
   state.active = ['food', 'drive'].map((k) => ({ text: SERVICE_DONE[k].text, when: SERVICE_DONE[k].when }));
   save();
   const isConnected = (id) => state.connected.includes(id);
   const mini = (id) => { const q = PEOPLE[id]; return q.photo ? `<img src="${q.photo}" alt="${esc(q.name)}">` : `<span>${esc(q.name[0])}</span>`; };
-  const shareBlock = (id) => { const share = SHARE[id]; return `<div class="share"><h3>${share.length ? `Sharing medical information with ${share.length} others` : "Can see Rosa's emergency sheet only"}</h3>
+  const shareBlock = (id) => { const share = SHARE[id]; return `<div class="share"><h3>${share.length ? `Sharing medical information with ${share.length} others` : "Can see Andrea's emergency sheet only"}</h3>
     ${share.length ? `<div class="stack">${share.map((s2) => `<a class="mini" href="#/family/${s2}" data-person="${s2}" title="${esc(PEOPLE[s2].name)}">${mini(s2)}</a>`).join('')}</div>` : ''}</div>`; };
   const connectLabel = (id) => `Connect with ${REL[id][1] ? esc(REL[id][1]) + ' ' : ''}<b>${esc(PEOPLE[id].name)}</b>`;
 
   /* ---------- preparedness ----------
-     Everyone works through the same list: Rosa's 5 topics, 3 tasks each, shared equally so everyone is prepared.
-     A person's meter = share of the 15 tasks they have done. Rosa's meter = the family average. */
+     Everyone works through the same list: Andrea's 5 topics, 3 tasks each, shared equally so everyone is prepared.
+     A person's meter = share of the 15 tasks they have done. Andrea's meter = the family average. */
   const PREP = [
-    { name: 'Wishes', tasks: ['Talk with Rosa about what matters to her', "Read Rosa's wishes in era", 'Know where Rosa wants to live later on'] },
-    { name: 'Health', tasks: ["Know Rosa's medicines and her allergy", "Save Rosa's emergency sheet on your phone", 'Know how to reach Dr. Ferri'] },
-    { name: 'Legal', tasks: ['Know who has power of attorney', "Read Rosa's living will", 'Know where her documents are kept'] },
-    { name: 'Living at home', tasks: ["Walk through Rosa's flat with her", 'Know which services help Rosa at home', 'Agree who checks in on which day'] },
-    { name: 'Money & funding', tasks: ["Know what Rosa's care costs", 'Know which funding Rosa can get', "Know who pays the bills if Rosa can't"] },
+    { name: 'Wishes', tasks: ['Talk with Andrea about what matters to him', "Read Andrea's wishes in era", 'Know where Andrea wants to live later on'] },
+    { name: 'Health', tasks: ["Know Andrea's medicines and his allergy", "Save Andrea's emergency sheet on your phone", 'Know how to reach Dr. Ferri'] },
+    { name: 'Legal', tasks: ['Know who has power of attorney', "Read Andrea's living will", 'Know where his documents are kept'] },
+    { name: 'Living at home', tasks: ["Walk through Andrea's flat with him", 'Know which services help Andrea at home', 'Agree who checks in on which day'] },
+    { name: 'Money & funding', tasks: ["Know what Andrea's care costs", 'Know which funding Andrea can get', "Know who pays the bills if Andrea can't"] },
   ];
   // example progress: what each person has done (1 = done), per topic in the order above
   const PREP_DONE = {
     giulia: [[1, 1, 1], [1, 1, 0], [1, 0, 1], [1, 0, 0], [0, 0, 0]],   //  8 of 15 · on the way
     marco:  [[1, 0, 0], [1, 0, 0], [1, 1, 1], [0, 0, 0], [1, 1, 0]],   //  7 of 15 · on the way
     sofia:  [[1, 1, 0], [0, 1, 0], [0, 0, 0], [1, 1, 0], [0, 0, 0]],   //  5 of 15 · getting started
-    lucia:  [[0, 0, 0], [1, 1, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]],   //  3 of 15 · getting started
   };
-  const PREP_MEMBERS = ['giulia', 'marco', 'sofia', 'lucia'];
+  const PREP_MEMBERS = ['giulia', 'marco', 'sofia'];
   if (!state.prep) { state.prep = PREP_DONE.giulia.map((t) => t.slice()); save(); }   // your own ticks are kept in the browser
   const prepOf = (id) => (id === 'giulia' ? state.prep : PREP_DONE[id]);
   const sum = (a) => a.flat().reduce((n, v) => n + v, 0);
@@ -275,7 +271,7 @@
     </svg>`;
   }
   const bar = (f) => `<span class="tbar"><i class="lv-${level(f).cls}" style="width:${wpct(f)}"></i></span>`;
-  // meter detail in a person's card (Rosa: the family's)
+  // meter detail in a person's card (Andrea: the family's)
   function meterBlock(id) {
     const f = prepScore(id), lv = level(f), rosa = id === 'rosa';
     return `<div class="pblock meter-block">
@@ -328,21 +324,21 @@
         <div class="pinfo">
           <h2 class="pname">${esc(m.name)}</h2>
           <p class="prel">${esc(d.who)} <span class="sep" aria-hidden="true">·</span> ${esc(d.cost)}</p>
-          <p class="paddr">${esc(d.dist)} from Rosa · ${esc(d.walk)}</p>
+          <p class="paddr">${esc(d.dist)} from Andrea · ${esc(d.walk)}</p>
         </div>
         <div class="pblock"><h3>What it is</h3><p class="svc-what">${esc(d.what)}</p></div>
         <div class="pblock"><h3>Status</h3>
-          <p class="svc-status">${on ? `<span class="svc-btn-on">Active</span> For Rosa · next: ${esc(SERVICE_DONE[k].soon)}` : '<span class="svc-off">Not opted in</span> Rosa doesn\'t use this yet'}</p>
+          <p class="svc-status">${on ? `<span class="svc-btn-on">Active</span> For Andrea · next: ${esc(SERVICE_DONE[k].soon)}` : '<span class="svc-off">Not opted in</span> Andrea doesn\'t use this yet'}</p>
           ${on ? `<p class="svc-when">${esc(SERVICE_DONE[k].when)}</p>` : ''}</div>
         <div class="pblock"><h3>Looked after by</h3><p class="svc-people">${m.people.map((id) => `<a class="mini" href="#/family/${id}" data-person="${id}" title="${esc(PEOPLE[id].name)}">${mini(id)}</a>`).join('')}<span>${esc(people)}</span></p></div>
         <div class="pfoot">${on
           ? `<a class="view-btn as-link" href="#/services/${k}">See it on the Services page</a>`
-          : `<button class="connect" type="button" data-action="${k}" data-who="rosa">Opt in for Rosa</button>`}</div>
+          : `<button class="connect" type="button" data-action="${k}" data-who="rosa">Opt in for Andrea</button>`}</div>
       </article>`;
   }
   function profile(id) {
     const p = PEOPLE[id], on = isConnected(id);
-    const title = id === 'rosa' ? `Mum | ${p.full}` : p.full;
+    const title = id === 'rosa' ? `Dad | ${p.full}` : p.full;
     return `
       <article class="card profile2 ${on ? 'is-on' : ''}" aria-label="${esc(p.name)}'s details">
         <div class="banner">${p.photo ? `<img src="${p.photo}" alt="${esc(p.full)}" style="object-position:${FOCUS[id] || '50% 40%'}">` : `<span class="initial-xl" aria-hidden="true">${esc(p.name[0])}</span>`}</div>
@@ -425,31 +421,31 @@
 
   /* ---------- your steps (scripted assistant + checklist) ---------- */
   const ANSWERS = [
-    { keys: ['home', 'living', 'alone', 'stay'], title: 'Help Rosa keep living at home',
-      text: 'Rosa wants to stay in her flat. That is often possible with a little help. Step by step:',
-      steps: ['Walk through the flat with Rosa: stairs, bathroom, light, rugs.', 'Ask her what is hard on a normal day.', 'Try one service for a week, like lunch delivery.', 'Check funding for home adjustments.', 'Decide who in the family looks after this topic.'] },
+    { keys: ['home', 'living', 'alone', 'stay'], title: 'Help Andrea keep living at home',
+      text: 'Andrea wants to stay in his flat. That is often possible with a little help. Step by step:',
+      steps: ['Walk through the flat with Andrea: stairs, bathroom, light, rugs.', 'Ask him what is hard on a normal day.', 'Try one service for a week, like lunch delivery.', 'Check funding for home adjustments.', 'Decide who in the family looks after this topic.'] },
     { keys: ['dementia', 'forget', 'memory', 'confus'], title: 'Signs of dementia',
-      text: 'Noticing changes in your mum is hard. If it happens more often, it is worth a check:',
+      text: 'Noticing changes in your dad is hard. If it happens more often, it is worth a check:',
       steps: ['Write down what you notice, with dates.', 'Book a visit with Dr. Ferri and bring your notes.', 'Ask about a memory check.', 'Make sure the power of attorney is signed in time.'] },
-    { keys: ['hospital', 'urgent', 'fell', 'emergency'], title: 'Rosa is in hospital',
+    { keys: ['hospital', 'urgent', 'fell', 'emergency'], title: 'Andrea is in hospital',
       text: 'I am sorry, that is a lot at once. You are not alone. Here is what to do, in order:',
-      steps: ['Show the ward Rosa\'s emergency sheet.', 'Tell the nurse Rosa takes a blood thinner.', 'Ask who plans her discharge.', 'Update Marco and Sofia in era.', 'If it gets too much, call a care advisor.'] },
+      steps: ['Show the ward Andrea\'s emergency sheet.', 'Tell the nurse Andrea takes a blood thinner.', 'Ask who plans his discharge.', 'Update Marco and Sofia in era.', 'If it gets too much, call a care advisor.'] },
     { keys: ['pay', 'money', 'fund', 'cost'], title: 'Funding for home adjustments',
       text: 'Changes like grab rails or a walk-in shower can be partly paid for:',
       steps: ['List what is hard at home.', 'Ask social services for a home visit.', 'Get a price from an approved fitter.', 'Apply — a care advisor checks the form with you.'] },
   ];
-  const SUGGEST = ['How can Rosa keep living at home?', 'Mum forgets things more often', 'Mum is in hospital. What now?', 'How do we pay for a shower?'];
+  const SUGGEST = ['How can Andrea keep living at home?', 'Dad forgets things more often', 'Dad is in hospital. What now?', 'How do we pay for a shower?'];
   // buttons under an answer: [label, primary?, link or toast]
   const ANSWER_ACTIONS = {
-    'Help Rosa keep living at home': [['See services near Rosa', true, '#/services'], ['Read: Living at home', false, '#/help']],
+    'Help Andrea keep living at home': [['See services near Andrea', true, '#/services'], ['Read: Living at home', false, '#/help']],
     'Signs of dementia': [['Book Dr. Ferri', true, 'toast:Request sent to Dr. Ferri\'s practice. They will call you back.'], ['Read: Dementia & memory', false, '#/help']],
-    'Rosa is in hospital': [['Call a care advisor', true, 'urgent'], ['Open emergency sheet', false, 'urgent']],
+    'Andrea is in hospital': [['Call a care advisor', true, 'urgent'], ['Open emergency sheet', false, 'urgent']],
     'Funding for home adjustments': [['Show funding office', true, '#/services/funding'], ['Talk to a care advisor', false, 'urgent']],
   };
-  let chat = [{ me: false, html: '<p>Hello Andrea. I know Rosa\'s situation, so you don\'t have to explain everything. What\'s on your mind?</p>' }];
+  let chat = [{ me: false, html: '<p>Hello Isa. I know Andrea\'s situation, so you don\'t have to explain everything. What\'s on your mind?</p>' }];
   let pending = null, typing = false;
   if (!state.checklist.length) { // a first list, so the page never starts empty
-    state.checklist = [{ title: 'Living at home', items: [{ text: 'Walk through the flat with Rosa', done: true }, { text: 'Try lunch delivery for a week', done: true }, { text: 'Check funding for a walk-in shower', done: false }] }];
+    state.checklist = [{ title: 'Living at home', items: [{ text: 'Walk through the flat with Andrea', done: true }, { text: 'Try lunch delivery for a week', done: true }, { text: 'Check funding for a walk-in shower', done: false }] }];
     save();
   }
   const BOT_FACE = (cls = '') => `<svg class="bot-face ${cls}" viewBox="0 0 88 88" aria-hidden="true"><rect width="88" height="88" rx="24"/><path d="M32 30v9M56 30v9M24 50 A20 20 0 0 0 64 50"/></svg>`;
@@ -461,7 +457,7 @@
         <header class="convo-head">
           ${BOT_FACE()}
           <div><p class="convo-title">era assistant</p>
-            <p class="knows"><span>Knows:</span><i>Rosa, 78</i><i>lives alone</i><i>irregular heartbeat</i><i>GP: Dr. Ferri</i></p></div>
+            <p class="knows"><span>Knows:</span><i>Andrea, 78</i><i>lives alone</i><i>irregular heartbeat</i><i>GP: Dr. Ferri</i></p></div>
         </header>
         <div class="log" id="log" aria-live="polite"></div>
         <div class="convo-foot">
@@ -522,13 +518,13 @@
   }
 
   /* ---------- services ---------- */
-  // map positions are in the 760×880 map drawing (Rosa's home in the middle)
+  // map positions are in the 760×880 map drawing (Andrea's home in the middle)
   const SVC = [
     { id: 'food', img: 'assets/services/lunch-delivery.webp', cat: 'food', icon: 'food', name: 'Lunch delivery', who: 'Pranzo a Casa', cost: 'First week free', what: 'A warm lunch at the door, every day.', dist: '600 m', walk: '8 min walk', x: 260, y: 300 },
     { id: 'drive', img: 'assets/services/driving-service.webp', cat: 'transport', icon: 'car', name: 'Driving service', who: 'Bus Amico', cost: 'Free', what: 'Volunteer drivers to the doctor and hospital.', dist: '1.1 km', walk: '4 min by car', x: 600, y: 560 },
     { id: 'assist', img: 'assets/services/daily-care.webp', cat: 'home', icon: 'hand', name: 'Daily care assistant', who: 'Casa Serena', cost: 'Partly funded', what: 'Help with shopping, cleaning and medicines.', dist: '900 m', walk: '12 min walk', x: 220, y: 640 },
     { id: 'funding', img: 'assets/services/home-adjustments.webp', cat: 'funding', icon: 'home', name: 'Home adjustments', who: 'Social services', cost: 'Free advice', what: 'Advice and money for grab rails and showers.', dist: '1.6 km', walk: '6 min by car', x: 640, y: 220 },
-    { id: 'pharmacy', img: 'assets/services/pharmacy-delivery.webp', cat: 'health', icon: 'cross', name: 'Pharmacy delivery', who: 'Farmacia del Borgo', cost: 'Free delivery 65+', what: 'Medicines delivered to Rosa\'s door.', dist: '300 m', walk: '4 min walk', x: 470, y: 330 },
+    { id: 'pharmacy', img: 'assets/services/pharmacy-delivery.webp', cat: 'health', icon: 'cross', name: 'Pharmacy delivery', who: 'Farmacia del Borgo', cost: 'Free delivery 65+', what: 'Medicines delivered to Andrea\'s door.', dist: '300 m', walk: '4 min walk', x: 470, y: 330 },
   ];
   const SVC_CATS = [['all', 'All'], ['food', 'Food'], ['transport', 'Getting around'], ['home', 'Help at home'], ['health', 'Health'], ['funding', 'Funding']];
   let svcFilter = 'all', svcQuery = '', svcSel = null;
@@ -540,15 +536,15 @@
     return `
     <div class="svc-page">
       <div class="svc-left">
-        <div class="svc-head"><h1 class="h1">Services near Rosa</h1>
-          <p class="lead">Help close to Rosa's home in Bergamo. Ask with one click — era sends the request and keeps the family up to date.</p></div>
+        <div class="svc-head"><h1 class="h1">Services near Andrea</h1>
+          <p class="lead">Help close to Andrea's home in Bergamo. Ask with one click — era sends the request and keeps the family up to date.</p></div>
         <label class="svc-search">${icon('search')}<span class="sr-only">Search services</span>
           <input id="svcSearch" type="search" placeholder="Search for help, e.g. &quot;lunch&quot; or &quot;shower&quot;" value="${esc(svcQuery)}" autocomplete="off"></label>
         <div class="svc-chips" role="group" aria-label="Filter services">${SVC_CATS.map(([k, l]) => `<button type="button" data-svcfilter="${k}" aria-pressed="${k === svcFilter}">${l}</button>`).join('')}</div>
         <div class="svc-grid" id="svcGrid"></div>
       </div>
       <div class="svc-map"><div id="svcMap"></div>
-        <a class="map-tip" href="#/steps" data-q="How can Rosa keep living at home?">${BOT_FACE('small')}<span><b>Not sure what Rosa needs?</b><br>Ask era — it suggests services that fit her day.</span></a>
+        <a class="map-tip" href="#/steps" data-q="How can Andrea keep living at home?">${BOT_FACE('small')}<span><b>Not sure what Andrea needs?</b><br>Ask era — it suggests services that fit his day.</span></a>
       </div>
     </div>`;
   }
@@ -560,14 +556,14 @@
       return `<article class="svc2 ${on ? 'is-active' : ''} ${svcSel === s.id ? 'is-sel' : ''}" id="svc-${s.id}" data-svcsel="${s.id}">
         ${s.img ? `<img class="svc2-img" src="${s.img}" alt="">` : '<div class="svc2-img" aria-hidden="true"></div>'}
         <div class="svc2-text"><h3>${s.name}</h3><p class="what">${s.what}</p></div>
-        ${on ? `<p class="active-pill"><i></i>Active for Rosa · ${SERVICE_DONE[s.id].soon}</p>`
+        ${on ? `<p class="active-pill"><i></i>Active for Andrea · ${SERVICE_DONE[s.id].soon}</p>`
              : `<button class="ask-btn" type="button" data-action="${SERVICE_DONE[s.id] ? s.id : 'svc-' + s.id}" data-who="rosa">Ask for this ${icon('arrow')}</button>`}
       </article>`;
     }).join('') : '<p class="empty">No service matches. Try another word, or ask era.</p>';
     const vis = new Set(list.map((s) => s.id));
     const sel = SVC.find((s) => s.id === (svcSel || SVC.find((x) => isActive(x.id))?.id));
     const lw = (t, size) => t.length * size * 0.55 + 22;
-    $('#svcMap').innerHTML = `<svg viewBox="0 0 760 880" preserveAspectRatio="xMidYMid slice" role="group" aria-label="Map of services around Rosa's home">
+    $('#svcMap').innerHTML = `<svg viewBox="0 0 760 880" preserveAspectRatio="xMidYMid slice" role="group" aria-label="Map of services around Andrea's home">
       <g class="m-roads"><path d="M-20 300 C 160 330, 260 380, 380 430 C 500 480, 620 470, 780 440"/><path d="M380 430 C 360 300, 330 160, 300 -20"/><path d="M380 430 C 400 560, 430 720, 460 900"/><path d="M-20 640 C 150 600, 260 520, 380 430"/><path d="M380 430 C 520 360, 640 240, 780 180"/><path d="M120 -20 C 140 120, 180 220, 260 280"/></g>
       <g class="m-rings"><circle cx="380" cy="430" r="160"/><circle cx="380" cy="430" r="279"/></g>
       <text class="m-ring-t" x="380" y="262" text-anchor="middle">500 m</text><text class="m-ring-t" x="380" y="143" text-anchor="middle">1 km</text>
@@ -580,14 +576,14 @@
       <defs><clipPath id="clip-home"><circle cx="380" cy="430" r="48"/></clipPath></defs>
       <circle class="m-home-ring" cx="380" cy="430" r="53"/>
       <image href="${PEOPLE.rosa.photo}" x="332" y="382" width="96" height="96" clip-path="url(#clip-home)" preserveAspectRatio="xMidYMid slice"/>
-      <g class="m-home-l"><rect x="318" y="492" width="124" height="28" rx="14"/><text x="390" y="511" text-anchor="middle">Rosa's home</text>
+      <g class="m-home-l"><rect x="318" y="492" width="124" height="28" rx="14"/><text x="390" y="511" text-anchor="middle">Andrea's home</text>
         <svg x="326" y="499" width="14" height="14" viewBox="0 -960 960 960" class="m-ico-b ms">${I.home}</svg></g>
     </svg>`;
   }
 
   /* ---------- help desk ---------- */
   function help() {
-    const topics = [['Health', 'Doctors, medicines and the emergency sheet.', 'What should be on Rosa\'s emergency sheet?'], ['Wishes', 'What matters to Rosa, in her own words.', 'How do we talk about wishes?'], ['Legal', 'Power of attorney and living will.', 'How do we set up a power of attorney?'], ['Living at home', 'Safety at home and help with daily tasks.', 'How can Rosa keep living at home?'], ['Money & funding', 'What care costs and what is paid for.', 'How do we pay for home adjustments?'], ['Dementia & memory', 'When forgetting is worth a check.', 'Mum forgets things more often']];
+    const topics = [['Health', 'Doctors, medicines and the emergency sheet.', 'What should be on Andrea\'s emergency sheet?'], ['Wishes', 'What matters to Andrea, in his own words.', 'How do we talk about wishes?'], ['Legal', 'Power of attorney and living will.', 'How do we set up a power of attorney?'], ['Living at home', 'Safety at home and help with daily tasks.', 'How can Andrea keep living at home?'], ['Money & funding', 'What care costs and what is paid for.', 'How do we pay for home adjustments?'], ['Dementia & memory', 'When forgetting is worth a check.', 'Dad forgets things more often']];
     return `
     <section class="page-head"><h1 class="h1">Help desk</h1><p class="lead">Talk to a real person, or read short, clear answers.</p></section>
     <div class="grid">
@@ -768,7 +764,7 @@
       if (location.hash.startsWith('#/steps')) { e.preventDefault(); ask(d.q); } else { pending = d.q; }
       return;
     }
-    if (d.notify !== undefined) { toast('Marco, Sofia and Lucia got a message: "Rosa needs help — please check era."'); return; }
+    if (d.notify !== undefined) { toast('Marco and Sofia got a message: "Andrea needs help — please check era."'); return; }
     if (d.close !== undefined) { $('#urgent').close(); }
   });
   document.addEventListener('keydown', (e) => {
