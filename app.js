@@ -215,7 +215,7 @@
           <form data-ask>
             <label class="sr-only" for="ask">Ask era</label>
             <input id="ask" type="text" placeholder="how can I help you?" autocomplete="off">
-            <button class="send" type="submit" aria-label="Ask"><img src="assets/ui/send.svg" width="45" height="45" alt=""></button>
+            <button class="send" type="submit" aria-label="Ask"><img src="assets/ui/send.svg?v=2" width="45" height="45" alt=""></button>
           </form>
         </div>
       </section>
