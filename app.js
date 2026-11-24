@@ -199,7 +199,7 @@
       ${prepCard()}
       <section class="list-card fam-over" aria-label="Overview">
         <div class="list-head"><h2>Overview</h2><span>later this year</span></div>
-        ${state.active.length ? `<div class="grp"><p class="grp-t">Services for Andrea</p>${activeList()}</div>` : ''}
+        ${state.active.length ? `<div class="grp"><p class="grp-t">Services for Dad</p>${activeList()}</div>` : ''}
         ${months.map((m) => `<div class="grp"><p class="grp-t">${m}</p><ul class="events">${EVENTS.filter((e) => e[0] === m).map(([, day, what, who]) => `
           <li><span class="ev-day">${esc(day)}</span><span><span class="ev-what">${esc(what)}</span><span class="ev-who">${esc(who)}</span></span></li>`).join('')}</ul></div>`).join('')}
       </section>`;
