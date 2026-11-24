@@ -1003,3 +1003,4 @@ svg.ms, svg.ms path { fill: currentColor !important; stroke: none !important; }
 .member-pct { font-size: .9rem; font-weight: 500; font-variant-numeric: tabular-nums; }
 .member-name { font-size: .78rem; color: rgba(47, 47, 47, .7); margin-top: 2px; }
 .member:hover .member-name { color: var(--charcoal); }
+.meter-pct small { font-size: .55em; color: rgba(47, 47, 47, .6); margin-left: 1px; }

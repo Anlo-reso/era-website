@@ -148,8 +148,8 @@
     ? `<image href="${who.photo}" x="${p.x - p.r}" y="${p.y - p.r}" width="${p.r * 2}" height="${p.r * 2}" clip-path="url(#clip-${id})" preserveAspectRatio="xMidYMid slice"/>`
     : `<circle class="initial-bg" cx="${p.x}" cy="${p.y}" r="${p.r}"/><text class="initial" x="${p.x}" y="${p.y + p.r * 0.12}" font-size="${p.r * 0.8}" text-anchor="middle">${esc(who.name[0])}</text>`}
         <path class="meter-track" d="${arcD(p.x, p.y, mR)}" stroke-width="${mw}"/>
-        <path class="meter-edge" d="${arcD(p.x, p.y, mR)}" stroke-width="${mw + u(3)}" pathLength="1" stroke-dasharray="${mf.toFixed(3)} 1"/>
-        <path class="meter-fill lv-${level(mf).cls}" d="${arcD(p.x, p.y, mR)}" stroke-width="${mw}" pathLength="1" stroke-dasharray="${mf.toFixed(3)} 1"><title>${id === 'rosa' ? 'Family' : you ? 'Your' : esc(who.name) + "'s"} preparedness: ${pct(mf)}</title></path>
+        <path class="meter-edge" d="${arcD(p.x, p.y, mR)}" stroke-width="${mw + u(3)}" pathLength="1" stroke-dasharray="${q10(mf)} 1"/>
+        <path class="meter-fill lv-${level(mf).cls}" d="${arcD(p.x, p.y, mR)}" stroke-width="${mw}" pathLength="1" stroke-dasharray="${q10(mf)} 1"><title>${id === 'rosa' ? 'Family' : you ? 'Your' : esc(who.name) + "'s"} preparedness: ${pct(mf)}</title></path>
         <text class="name" x="${p.x}" y="${ly}" font-size="${you ? ns * 1.15 : ns}" text-anchor="middle">${you ? 'You' : `${esc(who.name)}${small ? '' : `<tspan class="role" font-size="${ls + 1}"> · ${esc(who.role)}</tspan>`}`}</text>
         ${small ? '' : `<g class="where"><rect x="${p.x - pinW / 2}" y="${py}" width="${pinW}" height="${pinH}" rx="${pinH / 2}"/>
           <svg class="pin ms" x="${px}" y="${pc - ic / 2}" width="${ic}" height="${ic}" viewBox="0 -960 960 960"><path d="${PIN}"/></svg>
@@ -248,8 +248,13 @@
   const PREP_TOTAL = PREP.reduce((n, t) => n + t.tasks.length, 0);
   const prepScore = (id) => (id === 'rosa' ? PREP_MEMBERS.reduce((n, m) => n + sum(prepOf(m)), 0) / (PREP_TOTAL * PREP_MEMBERS.length) : sum(prepOf(id)) / PREP_TOTAL);
   const topicScore = (id, ti) => (id === 'rosa' ? PREP_MEMBERS.reduce((n, m) => n + sum(prepOf(m)[ti]), 0) / (PREP[ti].tasks.length * PREP_MEMBERS.length) : sum(prepOf(id)[ti]) / PREP[ti].tasks.length);
-  const level = (f) => (f >= 0.75 ? { cls: 'well', label: 'Well prepared' } : f >= 0.4 ? { cls: 'way', label: 'On the way' } : { cls: 'start', label: 'Getting started' });
-  const pct = (f) => Math.round(f * 100) + '%';
+  // preparedness is shown as a level from 0 to 10 (not a percentage); the arc fills in tenths
+  const lvl10 = (f) => Math.round(f * 10);
+  const q10 = (f) => lvl10(f) / 10;
+  const level = (f) => { const q = q10(f); return q >= 0.8 ? { cls: 'well', label: 'Well prepared' } : q >= 0.4 ? { cls: 'way', label: 'On the way' } : { cls: 'start', label: 'Getting started' }; };
+  const pct = (f) => `${lvl10(f)}/10`;
+  const big10 = (f) => `${lvl10(f)}<small>/10</small>`;
+  const wpct = (f) => Math.round(f * 100) + '%';   // bar widths only
   // the bottom half of a circle: from the left, through the bottom, to the right
   const arcD = (cx, cy, R) => `M${(cx - R).toFixed(1)} ${cy} A ${R.toFixed(1)} ${R.toFixed(1)} 0 0 0 ${(cx + R).toFixed(1)} ${cy}`;
   // a face with its meter, for the cards
@@ -259,17 +264,17 @@
       <defs><clipPath id="mf-${id}-${size}"><circle r="${r}"/></clipPath></defs>
       ${q.photo ? `<image href="${q.photo}" x="${-r}" y="${-r}" width="${size}" height="${size}" clip-path="url(#mf-${id}-${size})" preserveAspectRatio="xMidYMid slice"/>` : `<circle class="mf-bg" r="${r}"/><text class="mf-initial" y="${r * 0.3}" font-size="${r * 0.9}" text-anchor="middle">${esc(q.name[0])}</text>`}
       <path class="meter-track" d="${arcD(0, 0, R)}" stroke-width="${w}"/>
-      <path class="meter-edge" d="${arcD(0, 0, R)}" stroke-width="${w + 3}" pathLength="1" stroke-dasharray="${f.toFixed(3)} 1"/>
-      <path class="meter-fill lv-${level(f).cls}" d="${arcD(0, 0, R)}" stroke-width="${w}" pathLength="1" stroke-dasharray="${f.toFixed(3)} 1"/>
+      <path class="meter-edge" d="${arcD(0, 0, R)}" stroke-width="${w + 3}" pathLength="1" stroke-dasharray="${q10(f)} 1"/>
+      <path class="meter-fill lv-${level(f).cls}" d="${arcD(0, 0, R)}" stroke-width="${w}" pathLength="1" stroke-dasharray="${q10(f)} 1"/>
     </svg>`;
   }
-  const bar = (f) => `<span class="tbar"><i class="lv-${level(f).cls}" style="width:${pct(f)}"></i></span>`;
+  const bar = (f) => `<span class="tbar"><i class="lv-${level(f).cls}" style="width:${wpct(f)}"></i></span>`;
   // meter detail in a person's card (Rosa: the family's)
   function meterBlock(id) {
     const f = prepScore(id), lv = level(f), rosa = id === 'rosa';
     return `<div class="pblock meter-block">
       <h3>${rosa ? 'Family preparedness' : 'Preparedness'}</h3>
-      <div class="meter-head">${meterFace(id, 52)}<div><p class="meter-pct lv-${lv.cls}">${pct(f)}</p><p class="meter-lv"><span class="lv-tag lv-${lv.cls}">${lv.label}</span>${rosa ? 'the family on average' : `${sum(prepOf(id))} of ${PREP_TOTAL} tasks`}</p></div></div>
+      <div class="meter-head">${meterFace(id, 52)}<div><p class="meter-pct lv-${lv.cls}">${big10(f)}</p><p class="meter-lv"><span class="lv-tag lv-${lv.cls}">${lv.label}</span>${rosa ? 'the family on average' : `${sum(prepOf(id))} of ${PREP_TOTAL} tasks`}</p></div></div>
       <ul class="topic-bars">${PREP.map((t, ti) => { const tf = topicScore(id, ti); return `<li><span class="tname">${t.name}</span>${bar(tf)}<span class="tnum">${rosa ? pct(tf) : `${sum(prepOf(id)[ti])}/${t.tasks.length}`}</span></li>`; }).join('')}</ul>
       ${rosa ? `<div class="member-row">${PREP_MEMBERS.map((m) => `<a class="member" href="#/family/${m}" data-person="${m}" title="${m === 'giulia' ? 'You' : esc(PEOPLE[m].name)}: ${pct(prepScore(m))}">
         <span class="member-pct">${pct(prepScore(m))}</span>${meterFace(m, 44)}<span class="member-name">${m === 'giulia' ? 'You' : esc(PEOPLE[m].name)}</span></a>`).join('')}</div>` : ''}
@@ -283,7 +288,7 @@
     const next = PREP.map((t, ti) => ({ ti, s: topicScore('giulia', ti), i: state.prep[ti].indexOf(0) })).filter((x) => x.i >= 0).sort((a, b) => a.s - b.s || a.ti - b.ti).slice(0, 3);
     return `<section class="list-card fam-list prep-card" aria-label="Your preparedness">
       <div class="list-head"><h2>Your preparedness</h2><span>${sum(state.prep)} of ${PREP_TOTAL} done</span></div>
-      <div class="meter-head">${meterFace('giulia', 60)}<div><p class="meter-pct lv-${lv.cls}">${pct(f)}</p><p class="meter-lv"><span class="lv-tag lv-${lv.cls}">${lv.label}</span></p></div></div>
+      <div class="meter-head">${meterFace('giulia', 60)}<div><p class="meter-pct lv-${lv.cls}">${big10(f)}</p><p class="meter-lv"><span class="lv-tag lv-${lv.cls}">${lv.label}</span></p></div></div>
       ${next.length ? `<div class="grp"><p class="grp-t">Do next to improve</p>${next.map(({ ti, i }) => `
         <button class="sugg-btn" type="button" data-prepdo="${ti}:${i}"><span class="sugg-t">${esc(PREP[ti].tasks[i])}</span><span class="sugg-topic">${esc(PREP[ti].name)}</span><span class="sugg-done">Done ${icon('check')}</span></button>`).join('')}</div>`
         : '<p class="meter-lv">You have done everything on your list.</p>'}
@@ -529,11 +534,11 @@
   /* ---------- services ---------- */
   // map positions are in the 760×880 map drawing (Rosa's home in the middle)
   const SVC = [
-    { id: 'food', cat: 'food', icon: 'food', name: 'Lunch delivery', who: 'Pranzo a Casa', cost: 'First week free', what: 'A warm lunch at the door, every day.', dist: '600 m', walk: '8 min walk', x: 260, y: 300 },
-    { id: 'drive', cat: 'transport', icon: 'car', name: 'Driving service', who: 'Bus Amico', cost: 'Free', what: 'Volunteer drivers to the doctor and hospital.', dist: '1.1 km', walk: '4 min by car', x: 600, y: 560 },
-    { id: 'assist', cat: 'home', icon: 'hand', name: 'Daily care assistant', who: 'Casa Serena', cost: 'Partly funded', what: 'Help with shopping, cleaning and medicines.', dist: '900 m', walk: '12 min walk', x: 220, y: 640 },
-    { id: 'funding', cat: 'funding', icon: 'home', name: 'Home adjustments', who: 'Social services', cost: 'Free advice', what: 'Advice and money for grab rails and showers.', dist: '1.6 km', walk: '6 min by car', x: 640, y: 220 },
-    { id: 'pharmacy', cat: 'health', icon: 'cross', name: 'Pharmacy delivery', who: 'Farmacia del Borgo', cost: 'Free delivery 65+', what: 'Medicines delivered to Rosa\'s door.', dist: '300 m', walk: '4 min walk', x: 470, y: 330 },
+    { id: 'food', img: 'assets/services/lunch-delivery.webp', cat: 'food', icon: 'food', name: 'Lunch delivery', who: 'Pranzo a Casa', cost: 'First week free', what: 'A warm lunch at the door, every day.', dist: '600 m', walk: '8 min walk', x: 260, y: 300 },
+    { id: 'drive', img: 'assets/services/driving-service.webp', cat: 'transport', icon: 'car', name: 'Driving service', who: 'Bus Amico', cost: 'Free', what: 'Volunteer drivers to the doctor and hospital.', dist: '1.1 km', walk: '4 min by car', x: 600, y: 560 },
+    { id: 'assist', img: 'assets/services/daily-care.webp', cat: 'home', icon: 'hand', name: 'Daily care assistant', who: 'Casa Serena', cost: 'Partly funded', what: 'Help with shopping, cleaning and medicines.', dist: '900 m', walk: '12 min walk', x: 220, y: 640 },
+    { id: 'funding', img: 'assets/services/home-adjustments.webp', cat: 'funding', icon: 'home', name: 'Home adjustments', who: 'Social services', cost: 'Free advice', what: 'Advice and money for grab rails and showers.', dist: '1.6 km', walk: '6 min by car', x: 640, y: 220 },
+    { id: 'pharmacy', img: 'assets/services/pharmacy-delivery.webp', cat: 'health', icon: 'cross', name: 'Pharmacy delivery', who: 'Farmacia del Borgo', cost: 'Free delivery 65+', what: 'Medicines delivered to Rosa\'s door.', dist: '300 m', walk: '4 min walk', x: 470, y: 330 },
   ];
   const SVC_CATS = [['all', 'All'], ['food', 'Food'], ['transport', 'Getting around'], ['home', 'Help at home'], ['health', 'Health'], ['funding', 'Funding']];
   let svcFilter = 'all', svcQuery = '', svcSel = null;
@@ -751,7 +756,7 @@
     if (!t) return;
     const d = t.dataset;
     if (d.person) { pick(d.person); return; }
-    if (d.prepdo) { const [ti, i] = d.prepdo.split(':').map(Number); state.prep[ti][i] = 1; save(); refreshFamily(); toast(`Done — you are now ${pct(prepScore('giulia'))} prepared.`); return; }
+    if (d.prepdo) { const [ti, i] = d.prepdo.split(':').map(Number); state.prep[ti][i] = 1; save(); refreshFamily(); toast(`Done — your preparedness is now ${pct(prepScore('giulia'))}.`); return; }
     if (d.connect) { openConnect(d.connect); return; }
     if (d.doc) { toast(`${d.doc} opens here (demo).`); return; }
     if (d.viewdetails) { toast(`${PEOPLE[d.viewdetails].name}'s full profile opens here (demo).`); return; }
