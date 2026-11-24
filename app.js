@@ -1,5 +1,5 @@
 /* era website — clickable prototype with made-up example data.
-   Routes: #/login · #/overview (home) · #/family[/<person> | /svc-<service>] · #/services[/<id>] · #/steps (assistant) · #/help */
+   Routes: #/login · #/family[/<person> | /svc-<service>] ("Overview", the home page) · #/services[/<id>] · #/steps (assistant) · #/help */
 (() => {
   'use strict';
   const $ = (s, el = document) => el.querySelector(s);
@@ -165,19 +165,6 @@
     return `<svg class="${enter ? 'enter' : ''}" role="group" aria-label="Map of Rosa's family around you"><defs>${defs}</defs>${s}<g class="svc-tags" aria-hidden="true">${tags}</g></svg>`;
   }
 
-  function overviewPage() {
-    return `
-    <section class="ov-head">
-      <div><h1 class="h1">Overview</h1><p class="lead">How prepared you are for Rosa's care, and what is coming up.</p></div>
-      <form class="ov-ask" data-ask>
-        <span class="bot" aria-hidden="true"><img src="assets/ui/bot-face.svg" width="53.3439" height="42.0934" alt=""></span>
-        <label class="sr-only" for="ovAsk">Ask era</label>
-        <input id="ovAsk" type="text" placeholder="how can I help you?" autocomplete="off">
-        <button class="send" type="submit" aria-label="Ask"><img src="assets/ui/send.svg" width="45" height="45" alt=""></button>
-      </form>
-    </section>
-    <div class="ov fam-side" id="ovSide">${overview('Coming up')}</div>`;
-  }
   function family() {
     return `
     <div class="fam">
@@ -209,12 +196,12 @@
     ['December', 'Tue 8', 'Cardiologist — heart check, 9:30', 'Rosa'],
     ['December', 'Every Wed', 'Sofia visits Nonna', 'Tech help with the phone'],
   ];
-  function overview(title = 'Overview') {
+  function overview() {
     const months = [...new Set(EVENTS.map((e) => e[0]))];
     return `
       ${prepCard()}
       <section class="list-card fam-over" aria-label="Overview">
-        <div class="list-head"><h2>${title}</h2><span>later this year</span></div>
+        <div class="list-head"><h2>Overview</h2><span>later this year</span></div>
         ${state.active.length ? `<div class="grp"><p class="grp-t">Services for Rosa</p>${activeList()}</div>` : ''}
         ${months.map((m) => `<div class="grp"><p class="grp-t">${m}</p><ul class="events">${EVENTS.filter((e) => e[0] === m).map(([, day, what, who]) => `
           <li><span class="ev-day">${esc(day)}</span><span><span class="ev-what">${esc(what)}</span><span class="ev-who">${esc(who)}</span></span></li>`).join('')}</ul></div>`).join('')}
@@ -700,10 +687,11 @@
   }
 
   /* ---------- routing ---------- */
-  const PAGES = { login, overview: overviewPage, family, steps, services, help };
-  const TITLES = { login: 'Welcome', overview: 'Overview', family: "Rosa's family", steps: 'era assistant', services: 'Services', help: 'Help desk' };
+  const PAGES = { login, family, steps, services, help };
+  const TITLES = { login: 'Welcome', family: 'Overview', steps: 'era assistant', services: 'Services', help: 'Help desk' };
   function render() {
-    const [route0, sub] = location.hash.replace(/^#\/?/, '').split('/');
+    let [route0, sub] = location.hash.replace(/^#\/?/, '').split('/');
+    if (route0 === 'overview') route0 = 'family';   // "Overview" in the menu is the family map page
     const route = PAGES[route0] ? route0 : 'login';
     if (route === 'family') { selected = sub && PEOPLE[sub] ? sub : null; selSvc = sub && sub.startsWith('svc-') && MAP_SVC[sub.slice(4)] ? sub.slice(4) : null; }
     document.body.classList.toggle('is-login', route === 'login');
@@ -717,7 +705,6 @@
     window.scrollTo(0, 0);
   }
   function refreshFamily() {
-    if ($('#ovSide')) { const sc = $('.prep-card')?.scrollTop || 0; $('#ovSide').innerHTML = overview('Coming up'); if ($('.prep-card')) $('.prep-card').scrollTop = sc; return; }
     if (!location.hash.startsWith('#/family')) return;
     $('#map').innerHTML = mapSVG(); applyView();
     const sc = $('.prep-card')?.scrollTop || 0;   // keep your place in your list while ticking
@@ -799,7 +786,7 @@
     e.preventDefault();
     const f = e.target;
     if (f.dataset.connectform) { const id = f.dataset.connectform; if (!state.connected.includes(id)) { state.connected.push(id); save(); } $('#connectDlg').close(); refreshFamily(); mapToast(id); return; }
-    if (f.id === 'loginForm') { location.hash = '#/overview'; return; }
+    if (f.id === 'loginForm') { location.hash = '#/family'; return; }
     if (f.id === 'chatForm') { const i = $('#q'); ask(i.value); i.value = ''; return; }
     if (f.dataset.ask !== undefined) { const v = $('input', f).value.trim(); if (v) { pending = v; location.hash = '#/steps'; } }
   });
