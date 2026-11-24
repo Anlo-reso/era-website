@@ -249,7 +249,7 @@
   // Person card, as on the Figma board:
   //  · connected   → banner, name, relation, address, upcoming appointments, important documents, (sharing), "View details"
   //  · not yet     → banner, name, relation, address, sharing, big "Connect with brother Marco" → pop-up → "now connected"
-  const REL = { rosa: ['Your Father', 'dad'], giulia: ['You', ''], marco: ['Your brother', 'brother'], sofia: ["Andrea's granddaughter", ''] };
+  const REL = { rosa: ['Your father', 'dad'], giulia: ['You', ''], marco: ['Your brother', 'brother'], sofia: ["Andrea's granddaughter", ''] };
   const ADDR = { rosa: 'Via Pignolo 12, Bergamo · 50 min from you', giulia: 'Milano · your home', marco: 'Via Tasso 8, Bergamo · 50 min from you', sofia: 'Bergamo · 55 min from you' };
   const SHARE = { rosa: ['giulia', 'marco'], giulia: ['rosa', 'marco'], marco: ['sofia', 'giulia'], sofia: ['rosa', 'giulia'] };
   const FOCUS = { rosa: '50% 42%', giulia: '50% 38%', marco: '50% 30%', sofia: '50% 62%' }; // where the face sits in each photo
@@ -512,7 +512,7 @@
         <header class="convo-head">
           ${BOT_FACE()}
           <div><p class="convo-title">era assistant</p>
-            <p class="knows"><span>Knows:</span><i>Andrea, 78</i><i>lives alone</i><i>irregular heartbeat</i><i>GP: Dr. Ferri</i></p></div>
+            <p class="knows"><span>Knows:</span><i>Andrea, 71</i><i>lives alone</i><i>irregular heartbeat</i><i>GP: Dr. Ferri</i></p></div>
         </header>
         <div class="log" id="log" aria-live="polite"></div>
         <div class="convo-foot">
