@@ -69,23 +69,33 @@
      Coordinates are relative to you at (0, 0). `where` = city · travel time from you. */
   const MAPP = {
     giulia: { x: 0, y: 0, r: 78, where: 'Milano' },
-    rosa:   { x: -380, y: -200, r: 64, where: 'Bergamo · 50 min' },
-    lucia:  { x: -620, y: -10, r: 46, where: 'Bergamo · 50 min' },
-    sofia:  { x: 410, y: -230, r: 56, where: 'Bergamo · 55 min' },
-    marco:  { x: 390, y: 250, r: 58, where: 'Bergamo · 50 min' },
+    rosa:   { x: -360, y: -300, r: 66, where: 'Bergamo · 50 min' },
+    lucia:  { x: -730, y: -250, r: 46, where: 'Bergamo · 50 min' },
+    sofia:  { x: 360, y: -320, r: 56, where: 'Bergamo · 55 min' },
+    marco:  { x: -600, y: 190, r: 58, where: 'Bergamo · 50 min' },
   };
-  // services near Rosa, next to her
-  const STOPS = { food: { x: -600, y: -360, label: 'Food delivery' }, home: { x: -100, y: -400, label: 'Home help' }, car: { x: -400, y: 250, label: 'Driving service' } };
-  const FAM_LINKS = [['giulia', 'rosa'], ['giulia', 'sofia'], ['giulia', 'marco'], ['rosa', 'lucia'], ['rosa', 'sofia'], ['rosa', 'food'], ['rosa', 'home'], ['rosa', 'car']];
+  const FAM_LINKS = [['giulia', 'rosa'], ['giulia', 'sofia'], ['giulia', 'marco'], ['rosa', 'lucia'], ['rosa', 'sofia'], ['rosa', 'marco']];
   const PEOPLE_ORDER = ['giulia', 'rosa', 'sofia', 'marco', 'lucia'];   // the order they appear in
+  // Rosa's services sit on her line to the person who looks after them: [line from, line to, how far along, who is part of it]
+  const MAP_SVC = {
+    food:    { name: 'Food delivery', icon: 'food', on: ['giulia', 'rosa', 0.33], people: ['giulia', 'rosa'] },
+    assist:  { name: 'Day care assistant', icon: 'hand', on: ['rosa', 'sofia', 0.5], people: ['sofia', 'rosa'] },
+    drive:   { name: 'Driving assistant', icon: 'car', on: ['rosa', 'marco', 0.5], people: ['marco', 'rosa'] },
+    funding: { name: 'Home adjustments', icon: 'home', on: ['rosa', 'marco', 0.74], people: ['marco', 'rosa'] },
+  };
   let selected = null;
-  const at = (k) => MAPP[k] || STOPS[k];
-  // a gently bent line between two places
-  function link(a, b) {
+  const at = (k) => MAPP[k];
+  // a gently bent line between two people: start, bend point, end
+  function linkGeom(a, b) {
     const p = at(a), q = at(b), dx = q.x - p.x, dy = q.y - p.y, d = Math.hypot(dx, dy), bend = d * 0.08 * ((a.length + b.length) % 2 ? 1 : -1);
-    const mx = (p.x + q.x) / 2 - dy / d * bend, my = (p.y + q.y) / 2 + dx / d * bend;
-    return `M${p.x} ${p.y} Q ${mx.toFixed(1)} ${my.toFixed(1)} ${q.x} ${q.y}`;
+    return { p, c: { x: (p.x + q.x) / 2 - dy / d * bend, y: (p.y + q.y) / 2 + dx / d * bend }, q };
   }
+  function link(a, b) { const { p, c, q } = linkGeom(a, b); return `M${p.x} ${p.y} Q ${c.x.toFixed(1)} ${c.y.toFixed(1)} ${q.x} ${q.y}`; }
+  // the point a share t along a line
+  function alongLink(a, b, t) { const { p, c, q } = linkGeom(a, b), m = 1 - t; return { x: m * m * p.x + 2 * m * t * c.x + t * t * q.x, y: m * m * p.y + 2 * m * t * c.y + t * t * q.y }; }
+  // services and lines that belong to the person you picked
+  const svcOf = (id) => Object.keys(MAP_SVC).filter((k) => MAP_SVC[k].people.includes(id));
+  const lineHl = (a, b) => !!selected && svcOf(selected).some((k) => { const [x, y] = MAP_SVC[k].on; return (x === a && y === b) || (x === b && y === a); });
   const hasLink = (a, b) => FAM_LINKS.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
   // from you to the person you picked: directly, or through Rosa
   const routeTo = (id) => (id === 'giulia' ? '' : hasLink('giulia', id) ? link('giulia', id) : link('giulia', 'rosa') + ' ' + link('rosa', id));
@@ -104,16 +114,22 @@
     const z = mapZ(), u = (px) => px / z;           // text sizes in screen pixels, whatever the map's scale
     const ns = u(small ? 13 : 16), ls = u(12.5), ss = u(11.5);
     let s = '';
-    s += `<g class="links">${FAM_LINKS.map(([a, b], i) => `<path class="link" d="${link(a, b)}" pathLength="1" style="--i:${i}"/>`).join('')}</g>`;
+    s += `<g class="links">${FAM_LINKS.map(([a, b], i) => `<path class="link ${lineHl(a, b) ? 'hl' : ''}" d="${link(a, b)}" pathLength="1" style="--i:${i}"/>`).join('')}</g>`;
     // the route to the person you picked draws itself, and a dashed flow keeps travelling along it
     if (selected) { const d = routeTo(selected); if (d.trim()) s += `<path class="route" d="${d}" pathLength="1"/><path class="route-flow" d="${d}"/>`; }
-    s += Object.entries(STOPS).map(([k, v]) => {
-      const r = small ? 34 : 26, ic = small ? 34 : 24;
+    // services on the lines: blue when active (opted in), white when not; the picked person's ones light up
+    const mine = selected ? svcOf(selected) : [];
+    let tags = '';   // names, drawn last so nothing covers them; shown on hover or keyboard focus
+    s += Object.entries(MAP_SVC).map(([k, v]) => {
+      const { x, y } = alongLink(...v.on), on = isActive(k), hl = mine.includes(k), dim = selected && !hl;
+      const k2 = small ? 1.6 : 1 / z;   // on phones the map is tiny, so services scale with the faces instead of staying a fixed pixel size
+      const r = (hl ? 21 : 18) * k2, ic = (hl ? 22 : 19) * k2, label = `${v.name}${on ? ' · Active' : ''}`, fs = u(12), lw = textW(label, fs) + fs * 1.8, lh = fs * 2;
+      if (!small) tags += `<g class="svc-tag" id="tag-${k}"><rect x="${x - lw / 2}" y="${y - r - u(8) - lh}" width="${lw}" height="${lh}" rx="${lh / 2}"/><text x="${x}" y="${y - r - u(8) - lh / 2 + fs * 0.36}" font-size="${fs}" text-anchor="middle">${esc(label)}</text></g>`;
       return `
-      <g class="stop" role="button" tabindex="0" data-stop="${k}" aria-label="${v.label}">
-        <circle cx="${v.x}" cy="${v.y}" r="${r}"/>
-        <svg x="${v.x - ic / 2}" y="${v.y - ic / 2}" width="${ic}" height="${ic}" viewBox="0 -960 960 960" class="stop-ico ms">${I[k]}</svg>
-        ${small ? '' : `<text x="${v.x}" y="${v.y + 48}" font-size="${ss}" text-anchor="middle">${v.label}</text>`}
+      <g class="stop svcnode ${on ? 'on' : ''} ${hl ? 'hl' : ''} ${dim ? 'dim' : ''}" role="button" tabindex="0" data-stop="${k}" aria-label="${esc(v.name)}, ${on ? 'active' : 'not opted in'}. Open service">
+        ${hl ? `<circle class="svc-ring" cx="${x}" cy="${y}" r="${r + 5 * k2}"/>` : ''}
+        <circle class="svc-dot" cx="${x}" cy="${y}" r="${r}"/>
+        <svg x="${x - ic / 2}" y="${y - ic / 2}" width="${ic}" height="${ic}" viewBox="0 -960 960 960" class="svc-ico ms">${I[v.icon]}</svg>
       </g>`;
     }).join('');
     const defs = Object.entries(MAPP).map(([id, p]) => `<clipPath id="clip-${id}"><circle cx="${p.x}" cy="${p.y}" r="${p.r}"/></clipPath>`).join('');
@@ -135,7 +151,7 @@
           <text x="${px + ic + ls * 0.35}" y="${pc + ls * 0.36}" font-size="${ls}">${esc(p.where)}</text></g>`}
       </g>`;
     }).join('');
-    return `<svg class="${enter ? 'enter' : ''}" role="group" aria-label="Map of Rosa's family around you"><defs>${defs}</defs>${s}</svg>`;
+    return `<svg class="${enter ? 'enter' : ''}" role="group" aria-label="Map of Rosa's family around you"><defs>${defs}</defs>${s}<g class="svc-tags" aria-hidden="true">${tags}</g></svg>`;
   }
 
   function family() {
@@ -193,13 +209,24 @@
   const DOCS_FULL = ['Health insurance card', 'Medical Prescription', 'Living will', 'Report • Doctor’s appointment • 12/12/10'];
   const DOCS = { rosa: DOCS_FULL, giulia: ['Health insurance card'], marco: DOCS_FULL, sofia: ['Health insurance card'], lucia: ["Rosa's emergency sheet"] };
   // silent reset: every refresh starts with only Rosa (and you) connected, so the connect demo can be shown again
-  state.connected = ['rosa', 'giulia']; save();
+  state.connected = ['rosa', 'giulia'];
+  // …and with lunch delivery and the driving assistant active, so both service states are on the map
+  state.active = ['food', 'drive'].map((k) => ({ text: SERVICE_DONE[k].text, when: SERVICE_DONE[k].when }));
+  save();
   const isConnected = (id) => state.connected.includes(id);
   const mini = (id) => { const q = PEOPLE[id]; return q.photo ? `<img src="${q.photo}" alt="${esc(q.name)}">` : `<span>${esc(q.name[0])}</span>`; };
   const shareBlock = (id) => { const share = SHARE[id]; return `<div class="share"><h3>${share.length ? `Sharing medical information with ${share.length} others` : "Can see Rosa's emergency sheet only"}</h3>
     ${share.length ? `<div class="stack">${share.map((s2) => `<a class="mini" href="#/family/${s2}" data-person="${s2}" title="${esc(PEOPLE[s2].name)}">${mini(s2)}</a>`).join('')}</div>` : ''}</div>`; };
   const connectLabel = (id) => `Connect with ${REL[id][1] ? esc(REL[id][1]) + ' ' : ''}<b>${esc(PEOPLE[id].name)}</b>`;
 
+  // the person's active services, stacked at the end of their card
+  function svcStack(id) {
+    const list = svcOf(id).filter((k) => isActive(k));
+    return `<div class="svc-stack"><h3>Active services</h3>
+      ${list.map((k) => `<a class="svc-btn" href="#/services/${k}"><span class="svc-btn-ico">${icon(MAP_SVC[k].icon)}</span>
+        <span class="svc-btn-t"><b>${esc(MAP_SVC[k].name)}</b><span>${esc(SERVICE_DONE[k].soon)}</span></span><span class="svc-btn-on">Active</span></a>`).join('')}
+      <a class="svc-btn add" href="#/services">${icon('add')} Add a service</a></div>`;
+  }
   function profile(id) {
     const p = PEOPLE[id], on = isConnected(id);
     const title = id === 'rosa' ? `Mum | ${p.full}` : p.full;
@@ -216,7 +243,7 @@
           ${APPTS[id].length ? `<div class="pblock"><h3>Upcoming appointments</h3><ul class="appts">${APPTS[id].map(([w, t]) => `<li><span>${w}</span><span>${t}</span></li>`).join('')}</ul></div>` : ''}
           <div class="pblock"><h3>Important documents</h3><ul class="docs">${DOCS[id].map((d2) => `<li><button type="button" data-doc="${esc(d2)}">${esc(d2)}</button></li>`).join('')}</ul></div>
           ${id !== 'rosa' && id !== 'giulia' ? shareBlock(id) : ''}
-          <div class="pfoot"><button class="view-btn" type="button" data-viewdetails="${id}">View details</button></div>`
+          <div class="pfoot">${svcStack(id)}<button class="view-btn" type="button" data-viewdetails="${id}">View details</button></div>`
         : `
           ${shareBlock(id)}
           <div class="pfoot"><button class="connect" type="button" data-connect="${id}">${connectLabel(id)}</button></div>`}
@@ -243,6 +270,10 @@
     t.innerHTML = `<span class="mt-av">${mini(id)}<i>${icon('check')}</i></span><span>${esc(REL[id][0])} <b>${esc(PEOPLE[id].name)}</b> is now connected</span>`;
     t.classList.add('show'); clearTimeout(mtt); mtt = setTimeout(() => t.classList.remove('show'), 4200);
   }
+
+  const showTag = (e, on) => { const n = e.target.closest && e.target.closest('.svcnode'); if (n) $('#tag-' + n.dataset.stop)?.classList.toggle('show', on); };
+  ['pointerover', 'focusin'].forEach((t) => document.addEventListener(t, (e) => showTag(e, true)));
+  ['pointerout', 'focusout'].forEach((t) => document.addEventListener(t, (e) => showTag(e, false)));
 
   /* ---------- the map can be dragged; it always opens with you in the middle ---------- */
   let view = null, viewAnim = 0;
@@ -614,7 +645,7 @@
     if (d.svcsel && !e.target.closest('button, a')) { svcSel = svcSel === d.svcsel ? null : d.svcsel; renderServices(); return; }
     if (d.theme) { state.theme = d.theme; save(); const el = $('#intro'); el.className = el.className.replace(/theme-\w+/, 'theme-' + d.theme); $$('[data-theme]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.theme === d.theme)); return; }
     if (d.skip !== undefined) { e.preventDefault(); playIntro(true); $('#code')?.focus(); return; }
-    if (d.stop) { location.hash = '#/services/' + ({ food: 'food', car: 'drive', home: 'assist' })[d.stop]; return; }
+    if (d.stop) { location.hash = '#/services/' + d.stop; return; }
     if (d.action) {
       const s = SERVICE_DONE[d.action];
       if (s) {

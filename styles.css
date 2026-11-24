@@ -841,3 +841,41 @@ svg.ms, svg.ms path { fill: currentColor !important; stroke: none !important; }
   .top .textsize span { display: none; }
   .top .textsize button, .top .textsize button img { width: 34px; height: 34px; }
 }
+
+/* ===== services on the family lines =====
+   active (opted in) = blue dot, white icon · default = white dot, grey icon
+   picking a person lights up their services and the lines they sit on; the rest steps back */
+.map > svg .link.hl { stroke: var(--blue); stroke-width: 3; }
+.map > svg .svcnode { transition: opacity .25s; }
+.map > svg .svcnode .svc-dot { fill: #fff; stroke: #D9D7D8; stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.map > svg .svcnode .svc-ico { color: #8A8A8A; }
+.map > svg .svcnode.on .svc-dot { fill: var(--blue); stroke: #fff; stroke-width: 2; }
+.map > svg .svcnode.on .svc-ico { color: #fff; }
+.map > svg .svcnode .svc-ring { fill: none; stroke: var(--blue); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.map > svg .svcnode.hl:not(.on) .svc-ico { color: var(--blue-deep); }
+.map > svg .svcnode.dim { opacity: .35; }
+.map > svg .svcnode:hover .svc-dot, .map > svg .svcnode:focus-visible .svc-dot { stroke: var(--blue); }
+.map > svg .svc-tag rect { fill: #fff; }
+.map > svg .svc-tag text { fill: var(--charcoal); font-family: var(--font); font-weight: 500; }
+.map > svg.enter .svcnode { animation-delay: 1.3s; }
+
+/* active services, stacked at the end of the person's card */
+.svc-stack { display: grid; gap: 8px; margin-bottom: 10px; }
+.svc-stack h3 { font-size: .9rem; font-weight: 400; color: var(--charcoal); margin-bottom: 2px; }
+.svc-btn { display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 14px 8px 10px; border-radius: 14px; background: #EEF2FF; color: var(--charcoal); text-decoration: none; font-size: .9rem; }
+.svc-btn:hover { background: var(--blue-soft); }
+.svc-btn-ico { width: 38px; height: 38px; border-radius: 50%; background: var(--blue); color: #fff; display: grid; place-items: center; flex: none; }
+.svc-btn-ico svg { width: 20px; height: 20px; }
+.svc-btn-t { flex: 1; display: grid; line-height: 1.3; }
+.svc-btn-t b { font-weight: 500; }
+.svc-btn-t span { font-size: .8rem; color: #6B6B6B; }
+.svc-btn-on { font-size: .72rem; font-weight: 500; color: #fff; background: var(--blue); padding: 2px 9px; border-radius: 99px; }
+.svc-btn.add { justify-content: center; min-height: 48px; background: #fff; border: 1.5px dashed #C9CDDA; color: var(--blue-deep); font-weight: 500; }
+.svc-btn.add svg { width: 18px; height: 18px; }
+.svc-btn.add:hover { background: #F7F8FF; }
+/* a service's name shows above it on hover or keyboard focus */
+.map > svg .svc-tag { opacity: 0; pointer-events: none; transition: opacity .15s; }
+.map > svg .svc-tag.show { opacity: 1; }
+.map > svg .svcnode:hover, .map > svg .svcnode:focus-visible { opacity: 1; }
+/* with the service buttons, the card's footer scrolls with the rest of the card */
+.fam-side .profile2 .pfoot { position: static; padding-top: 18px; }
