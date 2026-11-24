@@ -22,6 +22,7 @@
     cross: '<path d="M120-120v-80l80-240-80-240v-80h508l58-160 94 34-46 126h106v80l-80 240 80 240v80H120Zm320-160h80v-120h120v-80H520v-120h-80v120H320v80h120v120Zm-236 80h552l-80-240 80-240H204l80 240-80 240Zm276-240Z"/>',  // local_pharmacy
     add: '<path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>',  // add
     question: '<path d="M424-320q0-81 14.5-116.5T500-514q41-36 62.5-62.5T584-637q0-41-27.5-68T480-732q-51 0-77.5 31T365-638l-103-44q21-64 77-111t141-47q105 0 161.5 58.5T698-641q0 50-21.5 85.5T609-475q-49 47-59.5 71.5T539-320H424Zm56 240q-33 0-56.5-23.5T400-160q0-33 23.5-56.5T480-240q33 0 56.5 23.5T560-160q0 33-23.5 56.5T480-80Z"/>',  // question_mark
+    remove: '<path d="M200-440v-80h560v80H200Z"/>',  // remove
   };
   const icon = (n) => `<svg class="ms" viewBox="0 -960 960 960" aria-hidden="true">${I[n]}</svg>`;
 
@@ -164,11 +165,16 @@
   }
 
   function family() {
+    mapZoom = 1;
     return `
     <div class="fam">
       <section class="fam-map" aria-label="Andrea's family">
         <p class="panel-title">Andrea's family · 4 people</p>
         <div class="map" id="map">${mapSVG(true)}</div>
+        <div class="map-zoom" role="group" aria-label="Zoom the map">
+          <button type="button" data-zoom="in" aria-label="Zoom in">${icon('add')}</button>
+          <button type="button" data-zoom="out" aria-label="Zoom out" disabled>${icon('remove')}</button>
+        </div>
         <div class="map-toast" id="mapToast" role="status" aria-live="polite"></div>
         <div class="ask">
           <span class="bot" aria-hidden="true"><img src="assets/ui/bot-face.svg" width="53.3439" height="42.0934" alt=""></span>
@@ -386,13 +392,26 @@
   ['pointerover', 'focusin'].forEach((t) => document.addEventListener(t, (e) => showTag(e, true)));
   ['pointerout', 'focusout'].forEach((t) => document.addEventListener(t, (e) => showTag(e, false)));
 
-  /* ---------- the map can be dragged; it always opens with you in the middle ---------- */
-  let view = null, viewAnim = 0;
+  /* ---------- the map can be dragged and zoomed; it always opens with you in the middle ---------- */
+  let view = null, viewAnim = 0, mapZoom = 1;
+  const ZOOM_MIN = 1, ZOOM_MAX = 2.4, ZOOM_STEP = 1.3;
   const CONTENT = { w: 1700, h: 1000 };   // the family around you, with room for names and pills
-  function mapBox() { const m = $('#map'), r = m ? m.getBoundingClientRect() : { width: 1200, height: 800 }, pw = r.width || 1200, ph = r.height || 800, z = Math.min(pw / CONTENT.w, ph / CONTENT.h); return { z, w: pw / z, h: ph / z }; }
+  function mapBox() { const m = $('#map'), r = m ? m.getBoundingClientRect() : { width: 1200, height: 800 }, pw = r.width || 1200, ph = r.height || 800, z = Math.min(pw / CONTENT.w, ph / CONTENT.h) * mapZoom; return { z, w: pw / z, h: ph / z }; }
   const baseView = (mb) => ({ x: -mb.w / 2, y: -mb.h / 2 + 30 });
   const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
-  function clampView(v, mb) { const b = baseView(mb); return { x: clamp(v.x, b.x - 450, b.x + 450), y: clamp(v.y, b.y - 320, b.y + 320) }; }
+  // zoomed in, you can move further, so every part of the family stays reachable
+  function clampView(v, mb) { const b = baseView(mb), sx = Math.max(450, (CONTENT.w - mb.w) / 2 + 150), sy = Math.max(320, (CONTENT.h - mb.h) / 2 + 150); return { x: clamp(v.x, b.x - sx, b.x + sx), y: clamp(v.y, b.y - sy, b.y + sy) }; }
+  // zoom around a point of the map (the middle, or where the pointer is); names and pills keep their size
+  function setZoom(nz, at) {
+    const map = $('#map'); if (!map) return;
+    nz = clamp(nz, ZOOM_MIN, ZOOM_MAX); if (Math.abs(nz - mapZoom) < 0.001) return;
+    cancelAnimationFrame(viewAnim);
+    const before = mapBox(); if (!view) view = baseView(before);
+    const fx = at ? at.fx : 0.5, fy = at ? at.fy : 0.5, px = view.x + before.w * fx, py = view.y + before.h * fy;
+    mapZoom = nz; map.innerHTML = mapSVG();
+    const after = mapBox(); view = { x: px - after.w * fx, y: py - after.h * fy }; applyView(); zoomButtons();
+  }
+  function zoomButtons() { const i = $('[data-zoom="in"]'), o = $('[data-zoom="out"]'); if (i) i.disabled = mapZoom >= ZOOM_MAX - 0.001; if (o) o.disabled = mapZoom <= ZOOM_MIN + 0.001; }
   function applyView() { const s2 = $('#map > svg'); if (!s2) return; const mb = mapBox(); if (!view) view = baseView(mb); view = clampView(view, mb); s2.setAttribute('viewBox', `${view.x.toFixed(1)} ${view.y.toFixed(1)} ${mb.w.toFixed(1)} ${mb.h.toFixed(1)}`); s2.setAttribute('preserveAspectRatio', 'xMidYMid meet'); }
   // everyone fits in view, so picking someone just glides the map back to you in the middle
   function focusOn() {
@@ -417,6 +436,7 @@
   document.addEventListener('wheel', (e) => {
     if (!e.target.closest('#map') || window.innerWidth <= 1020) return;
     e.preventDefault(); cancelAnimationFrame(viewAnim);
+    if (e.ctrlKey) { const r = $('#map').getBoundingClientRect(); setZoom(mapZoom * Math.exp(-e.deltaY * 0.01), { fx: (e.clientX - r.left) / r.width, fy: (e.clientY - r.top) / r.height }); return; }
     const mb = mapBox(); view = clampView({ x: (view ? view.x : 0) + e.deltaX / mb.z, y: (view ? view.y : 0) + e.deltaY / mb.z }, mb); applyView();
   }, { passive: false });
 
@@ -537,7 +557,7 @@
     return `
     <div class="svc-page">
       <div class="svc-left">
-        <div class="svc-head"><h1 class="h1">Services near Andrea</h1>
+        <div class="svc-head"><h1 class="h1">Care made easy with us</h1>
           <p class="lead">Help close to Andrea's home in Bergamo. Ask with one click — era sends the request and keeps the family up to date.</p></div>
         <label class="svc-search">${icon('search')}<span class="sr-only">Search services</span>
           <input id="svcSearch" type="search" placeholder="Search for help, e.g. &quot;lunch&quot; or &quot;shower&quot;" value="${esc(svcQuery)}" autocomplete="off"></label>
@@ -739,10 +759,11 @@
   document.addEventListener('click', (e) => {
     // tapping the empty map closes the person or service card
     if (e.target.closest('#map') && !e.target.closest('.person, .stop') && (selected || selSvc)) { selected = null; selSvc = null; history.replaceState(null, '', '#/family'); refreshFamily(); return; }
-    const t = e.target.closest('[data-person], [data-prepdo], [data-connect], [data-doc], [data-viewdetails], [data-skip], [data-svcfilter], [data-svcsel], [data-chatact], [data-stop], [data-action], [data-q], [data-check], [data-notify], [data-close]');
+    const t = e.target.closest('[data-person], [data-zoom], [data-prepdo], [data-connect], [data-doc], [data-viewdetails], [data-skip], [data-svcfilter], [data-svcsel], [data-chatact], [data-stop], [data-action], [data-q], [data-check], [data-notify], [data-close]');
     if (!t) return;
     const d = t.dataset;
     if (d.person) { pick(d.person); return; }
+    if (d.zoom) { setZoom(d.zoom === 'in' ? mapZoom * ZOOM_STEP : mapZoom / ZOOM_STEP); return; }
     if (d.prepdo) { const [ti, i] = d.prepdo.split(':').map(Number); state.prep[ti][i] = 1; save(); refreshFamily(); toast(`Done — your preparedness is now ${pct(prepScore('giulia'))}.`); return; }
     if (d.connect) { openConnect(d.connect); return; }
     if (d.doc) { toast(`${d.doc} opens here (demo).`); return; }

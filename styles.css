@@ -926,3 +926,11 @@ dialog, .connect-dlg, .person-card, .tabbar { border-radius: var(--r-lg); }
 .map > svg .cb-road.thin { stroke-opacity: .26; }
 .map > svg .cb-wall { stroke-opacity: .4; fill-opacity: .12; }
 .map > svg .cb-rail { stroke-opacity: .3; }
+
+/* zoom buttons on the family map */
+.map-zoom { position: absolute; top: 20px; right: 20px; z-index: 3; display: grid; gap: 8px; }
+.map-zoom button { width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 0; border-radius: var(--r); background: #fff; color: var(--charcoal); cursor: pointer; box-shadow: 0 1px 2px rgba(47, 47, 47, .08); }
+.map-zoom button svg { width: 22px; height: 22px; }
+.map-zoom button:hover:not(:disabled) { color: var(--blue); }
+.map-zoom button:disabled { color: rgba(47, 47, 47, .3); cursor: default; }
+@media (max-width: 1020px) { .map-zoom { top: 52px; right: 12px; } .map-zoom button { width: 38px; height: 38px; } }
