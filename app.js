@@ -31,8 +31,8 @@
   /* ---------- people (photos from the team's Figma) ---------- */
   const PEOPLE = {
     rosa:   { name: 'Andrea', role: 'Dad',           full: 'Andrea Balloni', born: '14.03.1955', photo: 'assets/people/andrea.jpg' },
-    giulia: { name: 'Isa',    role: 'You',           full: 'Isa Bianchi',    born: '02.04.1975', photo: 'assets/people/giulia.jpg' },
-    marco:  { name: 'Marco',  role: 'Brother',       full: 'Marco Bolognini', born: '19.07.1972', photo: 'assets/people/marco.jpg' },
+    giulia: { name: 'Isa',    role: 'You',           full: 'Isa Balloni',    born: '02.04.1975', photo: 'assets/people/giulia.jpg' },
+    marco:  { name: 'Marco',  role: 'Brother',       full: 'Marco Balloni',   born: '19.07.1972', photo: 'assets/people/marco.jpg' },
     sofia:  { name: 'Sofia',  role: 'Granddaughter', full: 'Sofia Rossi',   born: '30.01.2005', photo: 'assets/people/sofia.jpg' },
   };
   const SERVICE_DONE = {
