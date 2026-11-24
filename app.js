@@ -4,6 +4,8 @@
   'use strict';
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  // same breakpoints as styles.css: phone ≤ 767 · tablet ≤ 1023 · desktop above
+  const isTablet = () => window.matchMedia("(max-width: 1023px)").matches;
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const store = {
     get(k, d) { try { const v = localStorage.getItem('era2:' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
@@ -102,12 +104,12 @@
   // map units → screen pixels; before the map is on the page, estimate it from the window
   function mapZ() {
     if ($('#map')) return mapBox().z;
-    const w = window.innerWidth, small = w <= 1020;
+    const w = window.innerWidth, small = isTablet();
     const pw = small ? w - 28 : w - 64 - Math.min(460, Math.max(340, w * 0.28)), ph = small ? pw / 1.3 : Math.min(1000, Math.max(600, window.innerHeight - 110));
     return Math.min(pw / CONTENT.w, ph / CONTENT.h);
   }
   function mapSVG(enter) {
-    const small = window.innerWidth <= 1020;
+    const small = isTablet();
     const z = mapZ(), u = (px) => px / z;           // text sizes in screen pixels, whatever the map's scale
     const ns = u(small ? 13 : 16), ls = u(12.5), ss = u(11.5);
     let s = CITY_BG;
@@ -434,7 +436,7 @@
   document.addEventListener('pointerup', () => { if (drag) { $('#map')?.classList.remove('dragging'); drag = null; } });
   document.addEventListener('click', (e) => { if (dragMoved && e.target.closest('#map')) { e.stopPropagation(); e.preventDefault(); dragMoved = false; } }, true);
   document.addEventListener('wheel', (e) => {
-    if (!e.target.closest('#map') || window.innerWidth <= 1020) return;
+    if (!e.target.closest('#map') || isTablet()) return;
     e.preventDefault(); cancelAnimationFrame(viewAnim);
     if (e.ctrlKey) { const r = $('#map').getBoundingClientRect(); setZoom(mapZoom * Math.exp(-e.deltaY * 0.01), { fx: (e.clientX - r.left) / r.width, fy: (e.clientY - r.top) / r.height }); return; }
     const mb = mapBox(); view = clampView({ x: (view ? view.x : 0) + e.deltaX / mb.z, y: (view ? view.y : 0) + e.deltaY / mb.z }, mb); applyView();
@@ -748,13 +750,13 @@
     selected = selected === id ? null : id; selSvc = null;
     history.replaceState(null, '', selected ? '#/family/' + selected : '#/family');
     refreshFamily(); focusOn();
-    if (selected && window.innerWidth <= 1020) $('#side').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (selected && isTablet()) $('#side').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   function pickSvc(k) {
     selSvc = selSvc === k ? null : k; selected = null;
     history.replaceState(null, '', selSvc ? '#/family/svc-' + selSvc : '#/family');
     refreshFamily(); focusOn();
-    if (selSvc && window.innerWidth <= 1020) $('#side').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (selSvc && isTablet()) $('#side').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   document.addEventListener('click', (e) => {
     // tapping the empty map closes the person or service card
