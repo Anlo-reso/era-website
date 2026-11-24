@@ -986,3 +986,20 @@ svg.ms, svg.ms path { fill: currentColor !important; stroke: none !important; }
 .svc-people .mini img { width: 100%; height: 100%; object-fit: cover; }
 .svc-people span { margin-left: 18px; }
 .view-btn.as-link { display: grid; place-items: center; text-decoration: none; }
+
+/* active services: a row of icons, side by side */
+.svc-row { display: flex; gap: 14px; overflow-x: auto; padding: 2px 2px 4px; scrollbar-width: none; }
+.svc-chip { flex: none; width: 76px; display: grid; justify-items: center; gap: 4px; text-align: center; color: var(--charcoal); text-decoration: none; }
+.svc-chip-ico { width: 52px; height: 52px; border-radius: 50%; background: #5B75FE; color: #fff; display: grid; place-items: center; margin-bottom: 2px; transition: transform .15s; }
+.svc-chip-ico svg { width: 24px; height: 24px; }
+.svc-chip:hover .svc-chip-ico { transform: scale(1.06); }
+.svc-chip-name { font-size: .75rem; line-height: 1.2; font-weight: 500; }
+.svc-chip-when { font-size: .7rem; color: rgba(47, 47, 47, .7); line-height: 1.2; }
+.svc-chip.add .svc-chip-ico { background: #fff; color: #5B75FE; border: 1.5px dashed rgba(47, 47, 47, .2); }
+
+/* Rosa's card: everyone side by side — the % on top, the meter as the bottom half around the face */
+.member-row { display: flex; justify-content: space-between; gap: 8px; padding-top: 12px; border-top: 1px solid #E8E6E7; }
+.member { flex: 1; display: grid; justify-items: center; gap: 2px; color: var(--charcoal); text-decoration: none; }
+.member-pct { font-size: .9rem; font-weight: 500; font-variant-numeric: tabular-nums; }
+.member-name { font-size: .78rem; color: rgba(47, 47, 47, .7); margin-top: 2px; }
+.member:hover .member-name { color: var(--charcoal); }

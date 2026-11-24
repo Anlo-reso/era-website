@@ -23,6 +23,7 @@
     search: '<path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>',  // search
     pin: '<path d="M536.5-503.5Q560-527 560-560t-23.5-56.5Q513-640 480-640t-56.5 23.5Q400-593 400-560t23.5 56.5Q447-480 480-480t56.5-23.5ZM480-186q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z"/>',  // location_on
     cross: '<path d="M120-120v-80l80-240-80-240v-80h508l58-160 94 34-46 126h106v80l-80 240 80 240v80H120Zm320-160h80v-120h120v-80H520v-120h-80v120H320v80h120v120Zm-236 80h552l-80-240 80-240H204l80 240-80 240Zm276-240Z"/>',  // local_pharmacy
+    add: '<path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>',  // add
   };
   const icon = (n) => `<svg class="ms" viewBox="0 -960 960 960" aria-hidden="true">${I[n]}</svg>`;
 
@@ -270,7 +271,8 @@
       <h3>${rosa ? 'Family preparedness' : 'Preparedness'}</h3>
       <div class="meter-head">${meterFace(id, 52)}<div><p class="meter-pct lv-${lv.cls}">${pct(f)}</p><p class="meter-lv"><span class="lv-tag lv-${lv.cls}">${lv.label}</span>${rosa ? 'the family on average' : `${sum(prepOf(id))} of ${PREP_TOTAL} tasks`}</p></div></div>
       <ul class="topic-bars">${PREP.map((t, ti) => { const tf = topicScore(id, ti); return `<li><span class="tname">${t.name}</span>${bar(tf)}<span class="tnum">${rosa ? pct(tf) : `${sum(prepOf(id)[ti])}/${t.tasks.length}`}</span></li>`; }).join('')}</ul>
-      ${rosa ? `<ul class="member-bars">${PREP_MEMBERS.map((m) => `<li><a href="#/family/${m}" data-person="${m}"><span class="mini">${mini(m)}</span><span class="tname">${m === 'giulia' ? 'You' : esc(PEOPLE[m].name)}</span></a>${bar(prepScore(m))}<span class="tnum">${pct(prepScore(m))}</span></li>`).join('')}</ul>` : ''}
+      ${rosa ? `<div class="member-row">${PREP_MEMBERS.map((m) => `<a class="member" href="#/family/${m}" data-person="${m}" title="${m === 'giulia' ? 'You' : esc(PEOPLE[m].name)}: ${pct(prepScore(m))}">
+        <span class="member-pct">${pct(prepScore(m))}</span>${meterFace(m, 44)}<span class="member-name">${m === 'giulia' ? 'You' : esc(PEOPLE[m].name)}</span></a>`).join('')}</div>` : ''}
     </div>`;
   }
   // your card: your meter, what to do next, and your full to-do list
@@ -298,9 +300,11 @@
   function svcStack(id) {
     const list = svcOf(id).filter((k) => isActive(k));
     return `<div class="svc-stack"><h3>Active services</h3>
-      ${list.map((k) => `<a class="svc-btn" href="#/services/${k}"><span class="svc-btn-ico">${icon(MAP_SVC[k].icon)}</span>
-        <span class="svc-btn-t"><b>${esc(MAP_SVC[k].name)}</b><span>${esc(SERVICE_DONE[k].soon)}</span></span><span class="svc-btn-on">Active</span></a>`).join('')}
-      <a class="svc-btn add" href="#/services">${icon('add')} Add a service</a></div>`;
+      <div class="svc-row">
+      ${list.map((k) => `<a class="svc-chip" href="#/family/svc-${k}" data-stop="${k}" title="${esc(MAP_SVC[k].name)} · ${esc(SERVICE_DONE[k].soon)}">
+        <span class="svc-chip-ico">${icon(MAP_SVC[k].icon)}</span><span class="svc-chip-name">${esc(MAP_SVC[k].name)}</span><span class="svc-chip-when">${esc(SERVICE_DONE[k].soon)}</span></a>`).join('')}
+      <a class="svc-chip add" href="#/services"><span class="svc-chip-ico">${icon('add')}</span><span class="svc-chip-name">Add</span><span class="svc-chip-when">a service</span></a>
+      </div></div>`;
   }
   const sidePanel = () => (selSvc ? svcDetail(selSvc) : selected && selected !== 'giulia' ? profile(selected) : overview());
   // a service you tapped on the map: what it is, who looks after it, and one button that stays at the bottom
