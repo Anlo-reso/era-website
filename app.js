@@ -179,7 +179,7 @@
         </div>
         <div class="map-toast" id="mapToast" role="status" aria-live="polite"></div>
         <div class="ask">
-          <span class="bot" aria-hidden="true"><img src="assets/ui/bot-face.svg" width="53.3439" height="42.0934" alt=""></span>
+          <span class="bot" aria-hidden="true"><img src="assets/ui/assistant.svg" width="73" height="73" alt=""></span>
           <form data-ask>
             <label class="sr-only" for="ask">Ask era</label>
             <input id="ask" type="text" placeholder="how can I help you?" autocomplete="off">
@@ -471,7 +471,7 @@
     state.checklist = [{ title: 'Living at home', items: [{ text: 'Walk through the flat with Andrea', done: true }, { text: 'Try lunch delivery for a week', done: true }, { text: 'Check funding for a walk-in shower', done: false }] }];
     save();
   }
-  const BOT_FACE = (cls = '') => `<svg class="bot-face ${cls}" viewBox="0 0 88 88" aria-hidden="true"><rect width="88" height="88" rx="24"/><path d="M32 30v9M56 30v9M24 50 A20 20 0 0 0 64 50"/></svg>`;
+  const BOT_FACE = (cls = '') => `<img class="bot-face ${cls}" src="assets/ui/assistant.svg" alt="" aria-hidden="true">`;
 
   function steps() {
     return `
