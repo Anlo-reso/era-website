@@ -83,7 +83,7 @@
     drive:   { name: 'Driving assistant', icon: 'car', on: ['rosa', 'marco', 0.5], people: ['marco', 'rosa'] },
     funding: { name: 'Home adjustments', icon: 'home', on: ['rosa', 'marco', 0.74], people: ['marco', 'rosa'] },
   };
-  let selected = null;
+  let selected = null, selSvc = null;   // the person or the service you tapped
   const at = (k) => MAPP[k];
   // a gently bent line between two people: start, bend point, end
   function linkGeom(a, b) {
@@ -95,7 +95,7 @@
   function alongLink(a, b, t) { const { p, c, q } = linkGeom(a, b), m = 1 - t; return { x: m * m * p.x + 2 * m * t * c.x + t * t * q.x, y: m * m * p.y + 2 * m * t * c.y + t * t * q.y }; }
   // services and lines that belong to the person you picked
   const svcOf = (id) => Object.keys(MAP_SVC).filter((k) => MAP_SVC[k].people.includes(id));
-  const lineHl = (a, b) => !!selected && svcOf(selected).some((k) => { const [x, y] = MAP_SVC[k].on; return (x === a && y === b) || (x === b && y === a); });
+  const lineHl = (a, b) => (selected || selSvc) && (selSvc ? [selSvc] : svcOf(selected)).some((k) => { const [x, y] = MAP_SVC[k].on; return (x === a && y === b) || (x === b && y === a); });
   const hasLink = (a, b) => FAM_LINKS.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
   // from you to the person you picked: directly, or through Rosa
   const routeTo = (id) => (id === 'giulia' ? '' : hasLink('giulia', id) ? link('giulia', id) : link('giulia', 'rosa') + ' ' + link('rosa', id));
@@ -118,10 +118,10 @@
     // the route to the person you picked draws itself, and a dashed flow keeps travelling along it
     if (selected) { const d = routeTo(selected); if (d.trim()) s += `<path class="route" d="${d}" pathLength="1"/><path class="route-flow" d="${d}"/>`; }
     // services on the lines: blue when active (opted in), white when not; the picked person's ones light up
-    const mine = selected ? svcOf(selected) : [];
+    const mine = selSvc ? [selSvc] : selected ? svcOf(selected) : [];
     let tags = '';   // names, drawn last so nothing covers them; shown on hover or keyboard focus
     s += Object.entries(MAP_SVC).map(([k, v]) => {
-      const { x, y } = alongLink(...v.on), on = isActive(k), hl = mine.includes(k), dim = selected && !hl;
+      const { x, y } = alongLink(...v.on), on = isActive(k), hl = mine.includes(k), dim = (selected || selSvc) && !hl;
       const k2 = small ? 1.6 : 1 / z;   // on phones the map is tiny, so services scale with the faces instead of staying a fixed pixel size
       const r = (hl ? 21 : 18) * k2, ic = (hl ? 22 : 19) * k2, label = `${v.name}${on ? ' · Active' : ''}`, fs = u(12), lw = textW(label, fs) + fs * 1.8, lh = fs * 2;
       if (!small) tags += `<g class="svc-tag" id="tag-${k}"><rect x="${x - lw / 2}" y="${y - r - u(8) - lh}" width="${lw}" height="${lh}" rx="${lh / 2}"/><text x="${x}" y="${y - r - u(8) - lh / 2 + fs * 0.36}" font-size="${fs}" text-anchor="middle">${esc(label)}</text></g>`;
@@ -147,6 +147,7 @@
     ? `<image href="${who.photo}" x="${p.x - p.r}" y="${p.y - p.r}" width="${p.r * 2}" height="${p.r * 2}" clip-path="url(#clip-${id})" preserveAspectRatio="xMidYMid slice"/>`
     : `<circle class="initial-bg" cx="${p.x}" cy="${p.y}" r="${p.r}"/><text class="initial" x="${p.x}" y="${p.y + p.r * 0.12}" font-size="${p.r * 0.8}" text-anchor="middle">${esc(who.name[0])}</text>`}
         <path class="meter-track" d="${arcD(p.x, p.y, mR)}" stroke-width="${mw}"/>
+        <path class="meter-edge" d="${arcD(p.x, p.y, mR)}" stroke-width="${mw + u(3)}" pathLength="1" stroke-dasharray="${mf.toFixed(3)} 1"/>
         <path class="meter-fill lv-${level(mf).cls}" d="${arcD(p.x, p.y, mR)}" stroke-width="${mw}" pathLength="1" stroke-dasharray="${mf.toFixed(3)} 1"><title>${id === 'rosa' ? 'Family' : you ? 'Your' : esc(who.name) + "'s"} preparedness: ${pct(mf)}</title></path>
         <text class="name" x="${p.x}" y="${ly}" font-size="${you ? ns * 1.15 : ns}" text-anchor="middle">${you ? 'You' : `${esc(who.name)}${small ? '' : `<tspan class="role" font-size="${ls + 1}"> · ${esc(who.role)}</tspan>`}`}</text>
         ${small ? '' : `<g class="where"><rect x="${p.x - pinW / 2}" y="${py}" width="${pinW}" height="${pinH}" rx="${pinH / 2}"/>
@@ -173,7 +174,7 @@
           </form>
         </div>
       </section>
-      <aside class="fam-side" id="side">${selected && selected !== 'giulia' ? profile(selected) : overview()}</aside>
+      <aside class="fam-side" id="side">${sidePanel()}</aside>
     </div>`;
   }
 
@@ -257,6 +258,7 @@
       <defs><clipPath id="mf-${id}-${size}"><circle r="${r}"/></clipPath></defs>
       ${q.photo ? `<image href="${q.photo}" x="${-r}" y="${-r}" width="${size}" height="${size}" clip-path="url(#mf-${id}-${size})" preserveAspectRatio="xMidYMid slice"/>` : `<circle class="mf-bg" r="${r}"/><text class="mf-initial" y="${r * 0.3}" font-size="${r * 0.9}" text-anchor="middle">${esc(q.name[0])}</text>`}
       <path class="meter-track" d="${arcD(0, 0, R)}" stroke-width="${w}"/>
+      <path class="meter-edge" d="${arcD(0, 0, R)}" stroke-width="${w + 3}" pathLength="1" stroke-dasharray="${f.toFixed(3)} 1"/>
       <path class="meter-fill lv-${level(f).cls}" d="${arcD(0, 0, R)}" stroke-width="${w}" pathLength="1" stroke-dasharray="${f.toFixed(3)} 1"/>
     </svg>`;
   }
@@ -266,7 +268,7 @@
     const f = prepScore(id), lv = level(f), rosa = id === 'rosa';
     return `<div class="pblock meter-block">
       <h3>${rosa ? 'Family preparedness' : 'Preparedness'}</h3>
-      <div class="meter-head">${meterFace(id, 52)}<div><p class="meter-pct lv-${lv.cls}">${pct(f)}</p><p class="meter-lv">${lv.label}${rosa ? ' · the family on average' : ` · ${sum(prepOf(id))} of ${PREP_TOTAL} tasks`}</p></div></div>
+      <div class="meter-head">${meterFace(id, 52)}<div><p class="meter-pct lv-${lv.cls}">${pct(f)}</p><p class="meter-lv"><span class="lv-tag lv-${lv.cls}">${lv.label}</span>${rosa ? 'the family on average' : `${sum(prepOf(id))} of ${PREP_TOTAL} tasks`}</p></div></div>
       <ul class="topic-bars">${PREP.map((t, ti) => { const tf = topicScore(id, ti); return `<li><span class="tname">${t.name}</span>${bar(tf)}<span class="tnum">${rosa ? pct(tf) : `${sum(prepOf(id)[ti])}/${t.tasks.length}`}</span></li>`; }).join('')}</ul>
       ${rosa ? `<ul class="member-bars">${PREP_MEMBERS.map((m) => `<li><a href="#/family/${m}" data-person="${m}"><span class="mini">${mini(m)}</span><span class="tname">${m === 'giulia' ? 'You' : esc(PEOPLE[m].name)}</span></a>${bar(prepScore(m))}<span class="tnum">${pct(prepScore(m))}</span></li>`).join('')}</ul>` : ''}
     </div>`;
@@ -279,7 +281,7 @@
     const next = PREP.map((t, ti) => ({ ti, s: topicScore('giulia', ti), i: state.prep[ti].indexOf(0) })).filter((x) => x.i >= 0).sort((a, b) => a.s - b.s || a.ti - b.ti).slice(0, 3);
     return `<section class="list-card fam-list prep-card" aria-label="Your preparedness">
       <div class="list-head"><h2>Your preparedness</h2><span>${sum(state.prep)} of ${PREP_TOTAL} done</span></div>
-      <div class="meter-head">${meterFace('giulia', 60)}<div><p class="meter-pct lv-${lv.cls}">${pct(f)}</p><p class="meter-lv">${lv.label}</p></div></div>
+      <div class="meter-head">${meterFace('giulia', 60)}<div><p class="meter-pct lv-${lv.cls}">${pct(f)}</p><p class="meter-lv"><span class="lv-tag lv-${lv.cls}">${lv.label}</span></p></div></div>
       ${next.length ? `<div class="grp"><p class="grp-t">Do next to improve</p>${next.map(({ ti, i }) => `
         <button class="sugg-btn" type="button" data-prepdo="${ti}:${i}"><span class="sugg-t">${esc(PREP[ti].tasks[i])}</span><span class="sugg-topic">${esc(PREP[ti].name)}</span><span class="sugg-done">Done ${icon('check')}</span></button>`).join('')}</div>`
         : '<p class="meter-lv">You have done everything on your list.</p>'}
@@ -300,12 +302,34 @@
         <span class="svc-btn-t"><b>${esc(MAP_SVC[k].name)}</b><span>${esc(SERVICE_DONE[k].soon)}</span></span><span class="svc-btn-on">Active</span></a>`).join('')}
       <a class="svc-btn add" href="#/services">${icon('add')} Add a service</a></div>`;
   }
+  const sidePanel = () => (selSvc ? svcDetail(selSvc) : selected && selected !== 'giulia' ? profile(selected) : overview());
+  // a service you tapped on the map: what it is, who looks after it, and one button that stays at the bottom
+  function svcDetail(k) {
+    const m = MAP_SVC[k], d = SVC.find((x) => x.id === k), on = isActive(k);
+    const people = m.people.map((id) => (id === 'giulia' ? 'You' : PEOPLE[id].name)).join(' & ');
+    return `
+      <article class="card profile2 svc-detail ${on ? 'is-on' : ''}" aria-label="${esc(m.name)}">
+        <div class="banner svc-banner"><span class="svc-detail-ico">${icon(m.icon)}</span></div>
+        <div class="pinfo">
+          <h2 class="pname">${esc(m.name)}</h2>
+          <p class="prel">${esc(d.who)} <span class="sep" aria-hidden="true">·</span> ${esc(d.cost)}</p>
+          <p class="paddr">${esc(d.dist)} from Rosa · ${esc(d.walk)}</p>
+        </div>
+        <div class="pblock"><h3>What it is</h3><p class="svc-what">${esc(d.what)}</p></div>
+        <div class="pblock"><h3>Status</h3>
+          <p class="svc-status">${on ? `<span class="svc-btn-on">Active</span> For Rosa · next: ${esc(SERVICE_DONE[k].soon)}` : '<span class="svc-off">Not opted in</span> Rosa doesn\'t use this yet'}</p>
+          ${on ? `<p class="svc-when">${esc(SERVICE_DONE[k].when)}</p>` : ''}</div>
+        <div class="pblock"><h3>Looked after by</h3><p class="svc-people">${m.people.map((id) => `<a class="mini" href="#/family/${id}" data-person="${id}" title="${esc(PEOPLE[id].name)}">${mini(id)}</a>`).join('')}<span>${esc(people)}</span></p></div>
+        <div class="pfoot">${on
+          ? `<a class="view-btn as-link" href="#/services/${k}">See it on the Services page</a>`
+          : `<button class="connect" type="button" data-action="${k}" data-who="rosa">Opt in for Rosa</button>`}</div>
+      </article>`;
+  }
   function profile(id) {
     const p = PEOPLE[id], on = isConnected(id);
     const title = id === 'rosa' ? `Mum | ${p.full}` : p.full;
     return `
       <article class="card profile2 ${on ? 'is-on' : ''}" aria-label="${esc(p.name)}'s details">
-        <button class="back" type="button" data-person="${id}">${icon('back')} Overview</button>
         <div class="banner">${p.photo ? `<img src="${p.photo}" alt="${esc(p.full)}" style="object-position:${FOCUS[id] || '50% 40%'}">` : `<span class="initial-xl" aria-hidden="true">${esc(p.name[0])}</span>`}</div>
         <div class="pinfo">
           <h2 class="pname">${esc(title)}</h2>
@@ -317,7 +341,8 @@
           ${APPTS[id].length ? `<div class="pblock"><h3>Upcoming appointments</h3><ul class="appts">${APPTS[id].map(([w, t]) => `<li><span>${w}</span><span>${t}</span></li>`).join('')}</ul></div>` : ''}
           <div class="pblock"><h3>Important documents</h3><ul class="docs">${DOCS[id].map((d2) => `<li><button type="button" data-doc="${esc(d2)}">${esc(d2)}</button></li>`).join('')}</ul></div>
           ${id !== 'rosa' && id !== 'giulia' ? shareBlock(id) : ''}
-          <div class="pfoot">${svcStack(id)}<button class="view-btn" type="button" data-viewdetails="${id}">View details</button></div>`
+          ${svcStack(id)}
+          <div class="pfoot"><button class="view-btn" type="button" data-viewdetails="${id}">View details</button></div>`
         : `
           ${shareBlock(id)}
           <div class="pfoot"><button class="connect" type="button" data-connect="${id}">${connectLabel(id)}</button></div>`}
@@ -669,7 +694,7 @@
   function render() {
     const [route0, sub] = location.hash.replace(/^#\/?/, '').split('/');
     const route = PAGES[route0] ? route0 : 'login';
-    if (route === 'family') selected = sub && PEOPLE[sub] ? sub : null;
+    if (route === 'family') { selected = sub && PEOPLE[sub] ? sub : null; selSvc = sub && sub.startsWith('svc-') && MAP_SVC[sub.slice(4)] ? sub.slice(4) : null; }
     document.body.classList.toggle('is-login', route === 'login');
     $$('[data-nav]').forEach((a) => (a.dataset.nav === route ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current')));
     document.title = 'era – ' + TITLES[route];
@@ -684,7 +709,7 @@
     if (!location.hash.startsWith('#/family')) return;
     $('#map').innerHTML = mapSVG(); applyView();
     const sc = $('.prep-card')?.scrollTop || 0;   // keep your place in your list while ticking
-    $('#side').innerHTML = selected && selected !== 'giulia' ? profile(selected) : overview();
+    $('#side').innerHTML = sidePanel();
     if ($('.prep-card')) $('.prep-card').scrollTop = sc;
   }
   window.addEventListener('hashchange', render);
@@ -704,12 +729,20 @@
   function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 3600); }
 
   function pick(id) {
-    selected = selected === id ? null : id;
+    selected = selected === id ? null : id; selSvc = null;
     history.replaceState(null, '', selected ? '#/family/' + selected : '#/family');
     refreshFamily(); focusOn();
     if (selected && window.innerWidth <= 1020) $('#side').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+  function pickSvc(k) {
+    selSvc = selSvc === k ? null : k; selected = null;
+    history.replaceState(null, '', selSvc ? '#/family/svc-' + selSvc : '#/family');
+    refreshFamily(); focusOn();
+    if (selSvc && window.innerWidth <= 1020) $('#side').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
   document.addEventListener('click', (e) => {
+    // tapping the empty map closes the person or service card
+    if (e.target.closest('#map') && !e.target.closest('.person, .stop') && (selected || selSvc)) { selected = null; selSvc = null; history.replaceState(null, '', '#/family'); refreshFamily(); return; }
     const t = e.target.closest('[data-person], [data-prepdo], [data-connect], [data-doc], [data-viewdetails], [data-theme], [data-skip], [data-svcfilter], [data-svcsel], [data-chatact], [data-stop], [data-action], [data-q], [data-check], [data-notify], [data-close]');
     if (!t) return;
     const d = t.dataset;
@@ -723,7 +756,7 @@
     if (d.svcsel && !e.target.closest('button, a')) { svcSel = svcSel === d.svcsel ? null : d.svcsel; renderServices(); return; }
     if (d.theme) { state.theme = d.theme; save(); const el = $('#intro'); el.className = el.className.replace(/theme-\w+/, 'theme-' + d.theme); $$('[data-theme]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.theme === d.theme)); return; }
     if (d.skip !== undefined) { e.preventDefault(); playIntro(true); $('#code')?.focus(); return; }
-    if (d.stop) { location.hash = '#/services/' + d.stop; return; }
+    if (d.stop) { if ($('#map')) pickSvc(d.stop); else location.hash = '#/services/' + d.stop; return; }
     if (d.action) {
       const s = SERVICE_DONE[d.action];
       if (s) {
