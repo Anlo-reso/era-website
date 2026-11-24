@@ -1,0 +1,52 @@
+/* ===== Framer Motion version: small additions on top of styles.css =====
+   Framer Motion drives these animations now, so the old CSS transitions on the same elements are switched off. */
+
+/* the side panel swaps as one piece */
+.side-pane { display: flex; flex-direction: column; gap: 20px; min-height: 0; flex: 1 1 auto; }
+@media (max-width: 1020px) { .side-pane { gap: 16px; } }
+
+/* login: motion drives the stages */
+.m-intro .bub, .m-intro .links path, .m-intro .brand, .m-intro .join { transition: none !important; }
+.m-intro .bub { transform: none; opacity: 1; }
+
+/* the route to the person you picked */
+.map > svg .route-m { fill: none; stroke: #fff; stroke-width: 10; stroke-linecap: round; }
+
+/* the map toast and the toast: motion places them */
+.map-toast { transition: none; }
+.toast-host { position: fixed; left: 0; right: 0; bottom: 24px; display: flex; justify-content: center; pointer-events: none; z-index: 60; padding: 0 16px; }
+.toast-host .toast { position: static; transform: none; opacity: 1; transition: none; }
+@media (max-width: 1020px) { .toast-host { bottom: 96px; } }
+
+/* the underline that slides between menu items */
+.top .nav a.m-nav { position: relative; }
+.m-nav-line { position: absolute; left: 0; right: 0; bottom: -8px; height: 2px; border-radius: 2px; background: var(--charcoal); }
+
+/* the phone tab bar: the highlight slides between tabs */
+@media (max-width: 1020px) {
+  .tabbar a.m-tab { position: relative; isolation: isolate; }
+  .tabbar a.m-tab[aria-current="page"] { background: none; }
+  .m-tab-bg { position: absolute; inset: 0; z-index: -1; border-radius: inherit; background: var(--blue-mist); }
+}
+
+/* service filter chips: the dark pill slides to the one you pick */
+.svc-chips button.m-chip { position: relative; isolation: isolate; }
+.svc-chips button.m-chip[aria-pressed="true"] { background: #fff; color: #fff; border-color: var(--charcoal); }
+.m-chip-bg { position: absolute; inset: -1.5px; z-index: -1; border-radius: inherit; background: var(--charcoal); }
+.m-chip-t { position: relative; }
+
+/* photos zoom a touch inside their frame */
+.m-img { overflow: hidden; border-radius: var(--r); }
+
+/* to-do topics open and close smoothly (a button instead of <details>) */
+.ptopic .m-summary { display: grid; grid-template-columns: 1fr 90px 32px; align-items: center; gap: 10px; padding: 9px 4px; width: 100%;
+  border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; border-radius: var(--r); }
+.ptopic .m-summary:hover { background: rgba(91, 117, 254, .05); }
+.ptopic .m-summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.m-topic-body { overflow: hidden; }
+.m-topic-body > .it:first-child { margin-top: 6px; }
+.m-topic-body > .it:last-child { margin-bottom: 4px; }
+
+/* the checkbox tick is drawn by motion */
+.it .box svg, .cd-box svg { opacity: 1 !important; }
+.it .box > span, .cd-box > span { display: grid; place-items: center; }
