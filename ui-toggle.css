@@ -1,0 +1,10 @@
+/* the "UI" switch for the UI experiment: bottom-right, always on top, the same in both UIs */
+.ui-toggle {
+  position: fixed; right: 20px; bottom: 20px; z-index: 100;
+  width: 52px; height: 52px; border-radius: 50%; border: 0; cursor: pointer;
+  background: #2F2F2F; color: #fff; font: 600 15px/1 'Google Sans Flex', system-ui, sans-serif; letter-spacing: .02em;
+  box-shadow: 0 6px 20px rgba(47, 47, 47, .25); transition: background .2s, transform .2s;
+}
+.ui-toggle:hover { transform: scale(1.05); }
+.ui-toggle[aria-pressed="true"] { background: #5B75FE; }
+@media (max-width: 767px) { .ui-toggle { bottom: 96px; right: 16px; width: 46px; height: 46px; font-size: 14px; } }

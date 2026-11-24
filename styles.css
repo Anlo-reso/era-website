@@ -393,10 +393,6 @@ body.is-login main { padding: 0; }
 .svc-search svg { width: 18px; height: 18px; flex: none; }
 .svc-search input { flex: 1; border: 0; background: none; font: inherit; font-size: var(--t-ui); color: var(--charcoal); outline: none; min-height: 48px; }
 .svc-search:focus-within { box-shadow: 0 0 0 2px var(--blue); }
-.svc-chips { display: flex; flex-wrap: wrap; gap: var(--s-2); }
-.svc-chips button { min-height: 38px; padding: 0 16px; border-radius: 99px; border: 1.5px solid #E8E6E7; background: #fff; font: inherit; font-size: var(--t-small); cursor: pointer; color: var(--charcoal); }
-.svc-chips button:hover { border-color: rgba(47, 47, 47, .2); }
-.svc-chips button[aria-pressed="true"] { background: var(--charcoal); border-color: var(--charcoal); color: #fff; font-weight: 500; }
 .svc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--s-4); }
 .svc2 { display: flex; flex-direction: column; gap: var(--s-4); padding: 24px; border-radius: var(--r); background: var(--blue-mist); border: 1.5px solid transparent; cursor: pointer; transition: border-color .15s var(--ease-out), box-shadow .15s var(--ease-out); }
 .svc2:hover { border-color: var(--blue-soft); }
@@ -909,7 +905,7 @@ svg.ms, svg.ms path { fill: currentColor !important; stroke: none !important; }
    24px — big cards, panels and sections
    round — only faces, icon circles, small status tags and the location pills */
 :root { --r: 12px; --r-lg: 24px; }
-.btn, .top .urgent, .top .nav .nav-search, .top .textsize, .q, .sugg .q, .svc-chips button,
+.btn, .top .urgent, .top .nav .nav-search, .top .textsize, .q, .sugg .q,
 .ask form, .fam-map .ask form, .ask-bar, .svc-search, .join-form input, .join-btn,
 .connect, .view-btn, .ask-btn, .pill, .sugg-btn, .skip, .tabbar a,
 .it, .fam-side .it, .ptopic, .ptopic summary, .active, .empty, .dlg-cols section,

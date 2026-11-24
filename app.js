@@ -1,5 +1,5 @@
 /* era website — clickable prototype with made-up example data.
-   Routes: #/login · #/family[/<person> | /svc-<service>] ("Overview", the home page) · #/services[/<id>] · #/steps (assistant) · #/help */
+   Routes: #/login · #/family[/<person> | /svc-<service>] ("Overview", the home page) · #/services[/<id>] · #/steps (assistant) · #/help · #/privacy */
 (() => {
   'use strict';
   const $ = (s, el = document) => el.querySelector(s);
@@ -581,10 +581,9 @@
     { id: 'funding', img: 'assets/services/home-adjustments.webp', cat: 'funding', icon: 'home', name: 'Home adjustments', who: 'Social services', cost: 'Free advice', what: 'Advice and money for grab rails and showers.', dist: '1.6 km', walk: '6 min by car', x: 640, y: 220 },
     { id: 'pharmacy', img: 'assets/services/pharmacy-delivery.webp', cat: 'health', icon: 'cross', name: 'Pharmacy delivery', who: 'Farmacia del Borgo', cost: 'Free delivery 65+', what: 'Medicines delivered to Andrea\'s door.', dist: '300 m', walk: '4 min walk', x: 470, y: 330 },
   ];
-  const SVC_CATS = [['all', 'All'], ['food', 'Food'], ['transport', 'Getting around'], ['home', 'Help at home'], ['health', 'Health'], ['funding', 'Funding']];
-  let svcFilter = 'all', svcQuery = '', svcSel = null;
+  let svcQuery = '', svcSel = null;
   const isActive = (id) => SERVICE_DONE[id] && state.active.some((a) => a.text === SERVICE_DONE[id].text);
-  const svcVisible = () => SVC.filter((s) => (svcFilter === 'all' || s.cat === svcFilter) && (!svcQuery || (s.name + ' ' + s.who + ' ' + s.what).toLowerCase().includes(svcQuery.toLowerCase())));
+  const svcVisible = () => SVC.filter((s) => !svcQuery || (s.name + ' ' + s.who + ' ' + s.what).toLowerCase().includes(svcQuery.toLowerCase()));
 
   function services(sub) {
     svcSel = SVC.some((s) => s.id === sub) ? sub : (svcSel || null);
@@ -595,7 +594,6 @@
           <p class="lead">Help close to Andrea's home in Bergamo. Ask with one click — era sends the request and keeps the family up to date.</p></div>
         <label class="svc-search">${icon('search')}<span class="sr-only">Search services</span>
           <input id="svcSearch" type="search" placeholder="Search for help, e.g. &quot;lunch&quot; or &quot;shower&quot;" value="${esc(svcQuery)}" autocomplete="off"></label>
-        <div class="svc-chips" role="group" aria-label="Filter services">${SVC_CATS.map(([k, l]) => `<button type="button" data-svcfilter="${k}" aria-pressed="${k === svcFilter}">${l}</button>`).join('')}</div>
         <div class="svc-grid" id="svcGrid"></div>
       </div>
       <div class="svc-map"><div id="svcMap"></div>
@@ -634,6 +632,22 @@
       <g class="m-home-l"><rect x="318" y="492" width="124" height="28" rx="14"/><text x="390" y="511" text-anchor="middle">Andrea's home</text>
         <svg x="326" y="499" width="14" height="14" viewBox="0 -960 960 960" class="m-ico-b ms">${I.home}</svg></g>
     </svg>`;
+  }
+
+  /* ---------- privacy policy ---------- */
+  function privacy() {
+    return `
+    <section class="page-head"><h1 class="h1">Privacy Policy</h1><p class="lead">era is a public service. Your family's information belongs to you.</p></section>
+    <div class="grid">
+      <article class="list-card c7">
+        <ul class="lines">
+          <li>Andrea decides what is shared, and with whom. He can change it at any time.</li>
+          <li>Only family members Andrea connected can see his information.</li>
+          <li>Care advisors see Andrea's information only during a call you started.</li>
+          <li>era never sells data and shows no advertising.</li>
+        </ul>
+      </article>
+    </div>`;
   }
 
   /* ---------- help desk ---------- */
@@ -738,8 +752,8 @@
   }
 
   /* ---------- routing ---------- */
-  const PAGES = { login, family, steps, services, help };
-  const TITLES = { login: 'Welcome', family: 'Overview', steps: 'era assistant', services: 'Services', help: 'Help desk' };
+  const PAGES = { login, family, steps, services, help, privacy };
+  const TITLES = { login: 'Welcome', family: 'Overview', steps: 'era assistant', services: 'Services', help: 'Help desk', privacy: 'Privacy Policy' };
   function render() {
     let [route0, sub] = location.hash.replace(/^#\/?/, '').split('/');
     if (route0 === 'overview') route0 = 'family';   // "Overview" in the menu is the family map page
@@ -802,7 +816,6 @@
     if (d.connect) { openConnect(d.connect); return; }
     if (d.doc) { toast(`${d.doc} opens here (demo).`); return; }
     if (d.viewdetails) { toast(`${PEOPLE[d.viewdetails].name}'s full profile opens here (demo).`); return; }
-    if (d.svcfilter) { svcFilter = d.svcfilter; $$('[data-svcfilter]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.svcfilter === svcFilter)); renderServices(); return; }
     if (d.chatact) { if (d.chatact === 'urgent') $('#urgent').showModal(); else toast(d.chatact.replace(/^toast:/, '')); return; }
     if (d.svcsel && !e.target.closest('button, a')) { svcSel = svcSel === d.svcsel ? null : d.svcsel; renderServices(); return; }
     if (d.skip !== undefined) { e.preventDefault(); playIntro(true); $('#code')?.focus(); return; }
