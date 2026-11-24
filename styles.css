@@ -907,3 +907,11 @@ dialog, .connect-dlg, .person-card, .tabbar { border-radius: var(--r-lg); }
 .map > svg.enter .link.pending { animation: fam-fade .8s .8s ease backwards; }
 .map > svg.enter .route-q { animation: fam-pop .5s 1.2s cubic-bezier(.2, .8, .2, 1) backwards; }
 @keyframes fam-fade { from { opacity: 0; } }
+
+/* Bergamo, faintly, behind the family */
+.map > svg .city-bg { pointer-events: none; }
+.map > svg .city-bg path { fill: none; stroke: #fff; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.map > svg .cb-road { stroke-opacity: .5; stroke-width: 9; }
+.map > svg .cb-road.thin { stroke-opacity: .4; stroke-width: 4; }
+.map > svg .cb-wall { fill: #fff; fill-opacity: .18; stroke-opacity: .55; stroke-width: 3; stroke-dasharray: 2 7; }
+.map > svg .cb-rail { stroke-opacity: .45; stroke-width: 2; stroke-dasharray: 10 6; }

@@ -85,6 +85,22 @@
   const textW = (s, size) => s.length * size * 0.52;
   const PIN = 'M536.5-503.5Q560-527 560-560t-23.5-56.5Q513-640 480-640t-56.5 23.5Q400-593 400-560t23.5 56.5Q447-480 480-480t56.5-23.5ZM480-186q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z';
 
+  // a quiet Bergamo street layout behind the family: the walls of Città Alta on its hill, the ring roads and the
+  // main avenues down to the station, and the railway. A simplified drawing, not an exact map; no labels or icons.
+  const CITY_BG = `<g class="city-bg" aria-hidden="true">
+    <path class="cb-wall" d="M-560 -470 C -470 -540, -300 -560, -170 -530 C -60 -505, 30 -470, 60 -410 C 80 -360, 20 -320, -80 -305 C -200 -290, -330 -300, -440 -330 C -540 -360, -620 -410, -560 -470 Z"/>
+    <path class="cb-road" d="M-900 -230 C -650 -260, -380 -250, -150 -235 C 120 -218, 420 -260, 900 -300"/>
+    <path class="cb-road" d="M-900 90 C -600 60, -300 80, -40 110 C 260 145, 560 120, 900 70"/>
+    <path class="cb-road" d="M-120 -300 C -110 -160, -60 -40, 20 80 C 90 190, 140 330, 160 700"/>
+    <path class="cb-road" d="M-700 700 C -560 520, -420 360, -300 240 C -190 130, -80 40, 40 -40 C 180 -130, 380 -200, 900 -520"/>
+    <path class="cb-road thin" d="M-900 -420 C -760 -380, -650 -360, -560 -400"/>
+    <path class="cb-road thin" d="M60 -410 C 200 -450, 380 -470, 600 -560"/>
+    <path class="cb-road thin" d="M-600 -230 C -620 -60, -640 120, -680 700"/>
+    <path class="cb-road thin" d="M420 -255 C 430 -40, 460 160, 520 700"/>
+    <path class="cb-road thin" d="M-900 380 C -500 360, -100 390, 300 380 S 700 350, 900 360"/>
+    <path class="cb-rail" d="M-900 470 C -500 430, -150 450, 160 470 C 460 490, 700 470, 900 440"/>
+  </g>`;
+
   // map units → screen pixels; before the map is on the page, estimate it from the window
   function mapZ() {
     if ($('#map')) return mapBox().z;
@@ -96,7 +112,7 @@
     const small = window.innerWidth <= 1020;
     const z = mapZ(), u = (px) => px / z;           // text sizes in screen pixels, whatever the map's scale
     const ns = u(small ? 13 : 16), ls = u(12.5), ss = u(11.5);
-    let s = '';
+    let s = CITY_BG;
     // lines to people you are not connected with yet are still and dotted, with a question mark half-way
     const k2q = small ? 1.6 : 1 / z, dots = `stroke-dasharray:0 ${(8 * k2q).toFixed(1)};stroke-width:${(3.5 * k2q).toFixed(1)}`;
     s += `<g class="links">${FAM_LINKS.map(([a, b], i) => { const nc = notYet(a, b);
