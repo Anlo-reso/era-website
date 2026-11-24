@@ -122,10 +122,11 @@
     s += FAM_LINKS.filter(([a, b]) => notYet(a, b)).map(([a, b]) => { const m = alongLink(a, b, 0.5), qr = 15 * k2q, qi = 18 * k2q;
       return `<g class="route-q"><title>Not connected yet</title><circle cx="${m.x}" cy="${m.y}" r="${qr}"/><svg x="${m.x - qi / 2}" y="${m.y - qi / 2}" width="${qi}" height="${qi}" viewBox="0 -960 960 960" class="ms">${I.question}</svg></g>`; }).join('');
     // services on the lines: blue when active (opted in), white when not; the picked person's ones light up
-    const mine = selSvc ? [selSvc] : selected ? svcOf(selected) : [];
+    // by default (and when you pick yourself) no service is highlighted; picking someone else, or a service, lights theirs up
+    const mine = selSvc ? [selSvc] : selected && selected !== 'giulia' ? svcOf(selected) : [];
     let tags = '';   // names, drawn last so nothing covers them; shown on hover or keyboard focus
     s += Object.entries(MAP_SVC).map(([k, v]) => {
-      const { x, y } = v.at, on = isActive(k), hl = mine.includes(k), dim = (selected || selSvc) && !hl;
+      const { x, y } = v.at, hl = mine.includes(k), on = hl && isActive(k), dim = mine.length > 0 && !hl;
       const k2 = small ? 1.6 : 1 / z;   // on phones the map is tiny, so services scale with the faces instead of staying a fixed pixel size
       const r = (hl ? 21 : 18) * k2, ic = (hl ? 22 : 19) * k2, label = `${v.name}${on ? ' · Active' : ''}`, fs = u(12), lw = textW(label, fs) + fs * 1.8, lh = fs * 2;
       if (!small) tags += `<g class="svc-tag" id="tag-${k}"><rect x="${x - lw / 2}" y="${y - r - u(8) - lh}" width="${lw}" height="${lh}" rx="${lh / 2}"/><text x="${x}" y="${y - r - u(8) - lh / 2 + fs * 0.36}" font-size="${fs}" text-anchor="middle">${esc(label)}</text></g>`;
