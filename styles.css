@@ -429,8 +429,6 @@ body.is-login main { padding: 0; }
 .themes button { width: 30px; height: 30px; border-radius: 50%; padding: 3px; border: 1px solid transparent; background: none; cursor: pointer; }
 .themes button span { display: block; width: 100%; height: 100%; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
 .themes button[aria-pressed="true"] { border-color: var(--ink); }
-.replay { border: 0; background: none; color: var(--muted); font: inherit; font-size: .8rem; cursor: pointer; min-height: 36px; }
-.replay:hover { color: var(--ink); }
 .intro.instant *, .intro.instant { transition: none !important; }
 @media (max-width: 760px) {
   .intro-nav a, .intro-ts { display: none; }
@@ -649,8 +647,6 @@ body.is-login main { padding: 0; }
 .intro[data-stage="5"] .join { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
 .intro .join-form input { background: #fff; border: 0; color: var(--charcoal); }
 .intro .join-form input::placeholder { color: #6B6B6B; }
-.intro .replay { position: absolute; right: 24px; bottom: 18px; color: #6B6B6B; opacity: 0; transition: opacity .4s; }
-.intro[data-stage="5"] .replay { opacity: 1; }
 
 /* ===== Person card states, connect pop-up, "now connected" message, draggable map (Figma board) ===== */
 .profile2 .pname { font-size: 1.45rem; }

@@ -539,7 +539,6 @@
         </form>
         <a class="alt" href="#/login" data-skip>or join with your insurance ID</a>
       </div>
-      <button class="replay" type="button" data-replay>Replay</button>
     </section>`;
   }
 
@@ -589,7 +588,7 @@
     setIntroStage(skip || reduce ? 5 : 0); drawIntroMap();
     void el.offsetWidth; el.classList.remove('instant');
     // a click during the animation skips straight to the login
-    el.onclick = (e) => { if (introStage < 5 && !e.target.closest('[data-replay]')) playIntro(true); };
+    el.onclick = () => { if (introStage < 5) playIntro(true); };
     if (skip || reduce) { $('#code')?.focus({ preventScroll: true }); return; }
     STEPS.forEach(([ms, st]) => introTimers.push(setTimeout(() => setIntroStage(st), ms)));
     introTimers.push(setTimeout(() => $('#code')?.focus({ preventScroll: true }), STEPS[STEPS.length - 1][0] + 1100));
@@ -626,6 +625,12 @@
   function closeMenu() { svcMenu.hidden = true; svcBtn.setAttribute('aria-expanded', 'false'); }
   svcBtn.addEventListener('click', (e) => { e.stopPropagation(); const open = svcMenu.hidden; svcMenu.hidden = !open; svcBtn.setAttribute('aria-expanded', String(open)); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
+  // R replays the login intro (for demos) — but not while typing in a field or with a modifier key held
+  document.addEventListener('keydown', (e) => {
+    if (e.key.toLowerCase() !== 'r' || e.repeat || e.metaKey || e.ctrlKey || e.altKey || !$('#intro')) return;
+    if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) return;
+    e.preventDefault(); playIntro();
+  });
 
   /* ---------- events ---------- */
   let tt;
@@ -639,7 +644,7 @@
   }
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.has-menu')) closeMenu();
-    const t = e.target.closest('[data-person], [data-connect], [data-doc], [data-viewdetails], [data-theme], [data-replay], [data-skip], [data-svcfilter], [data-svcsel], [data-chatact], [data-stop], [data-action], [data-q], [data-check], [data-notify], [data-close]');
+    const t = e.target.closest('[data-person], [data-connect], [data-doc], [data-viewdetails], [data-theme], [data-skip], [data-svcfilter], [data-svcsel], [data-chatact], [data-stop], [data-action], [data-q], [data-check], [data-notify], [data-close]');
     if (!t) return;
     const d = t.dataset;
     if (d.person) { pick(d.person); return; }
@@ -650,7 +655,6 @@
     if (d.chatact) { if (d.chatact === 'urgent') $('#urgent').showModal(); else toast(d.chatact.replace(/^toast:/, '')); return; }
     if (d.svcsel && !e.target.closest('button, a')) { svcSel = svcSel === d.svcsel ? null : d.svcsel; renderServices(); return; }
     if (d.theme) { state.theme = d.theme; save(); const el = $('#intro'); el.className = el.className.replace(/theme-\w+/, 'theme-' + d.theme); $$('[data-theme]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.theme === d.theme)); return; }
-    if (d.replay !== undefined) { playIntro(); return; }
     if (d.skip !== undefined) { e.preventDefault(); playIntro(true); $('#code')?.focus(); return; }
     if (d.stop) { location.hash = '#/services/' + ({ food: 'food', car: 'drive', home: 'assist' })[d.stop]; return; }
     if (d.action) {
