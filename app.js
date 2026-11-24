@@ -135,16 +135,19 @@
     const defs = Object.entries(MAPP).map(([id, p]) => `<clipPath id="clip-${id}"><circle cx="${p.x}" cy="${p.y}" r="${p.r}"/></clipPath>`).join('');
     s += PEOPLE_ORDER.slice().reverse().map((id) => {
       const p = MAPP[id], who = PEOPLE[id], you = id === 'giulia';
-      const ly = p.y + p.r + (you ? 22 : 14) + ns;
+      const mf = prepScore(id), mR = p.r + 6 + u(7), mw = u(5);
+      const ly = p.y + p.r + (you ? 22 : 14) + ns + u(12);
       const pinW = textW(p.where, ls) + ls * 2.9, pinH = ls * 2, py = ly + ls * 0.8, pc = py + pinH / 2, ic = ls * 1.25;
       const px = p.x - pinW / 2 + ls * 0.7;
       return `
-      <g class="person ${selected === id ? 'sel' : ''} ${you ? 'is-you' : ''}" data-person="${id}" role="button" tabindex="0" style="--i:${PEOPLE_ORDER.indexOf(id)}" aria-pressed="${selected === id}" aria-label="${you ? 'You' : `${esc(who.name)}, ${esc(who.role)}`}, ${esc(p.where)}. Show details">
+      <g class="person ${selected === id ? 'sel' : ''} ${you ? 'is-you' : ''}" data-person="${id}" role="button" tabindex="0" style="--i:${PEOPLE_ORDER.indexOf(id)}" aria-pressed="${selected === id}" aria-label="${you ? 'You' : `${esc(who.name)}, ${esc(who.role)}`}, ${esc(p.where)}, ${id === 'rosa' ? 'family' : ''} preparedness ${pct(mf)}. Show details">
         ${selected === id || (you && !selected) ? `<circle class="sel-ring" cx="${p.x}" cy="${p.y}" r="${p.r + 6}"/>` : ''}
         <circle class="halo" cx="${p.x}" cy="${p.y}" r="${p.r + 16}"/><circle class="edge" cx="${p.x}" cy="${p.y}" r="${p.r + 1}"/>
         ${who.photo
     ? `<image href="${who.photo}" x="${p.x - p.r}" y="${p.y - p.r}" width="${p.r * 2}" height="${p.r * 2}" clip-path="url(#clip-${id})" preserveAspectRatio="xMidYMid slice"/>`
     : `<circle class="initial-bg" cx="${p.x}" cy="${p.y}" r="${p.r}"/><text class="initial" x="${p.x}" y="${p.y + p.r * 0.12}" font-size="${p.r * 0.8}" text-anchor="middle">${esc(who.name[0])}</text>`}
+        <path class="meter-track" d="${arcD(p.x, p.y, mR)}" stroke-width="${mw}"/>
+        <path class="meter-fill lv-${level(mf).cls}" d="${arcD(p.x, p.y, mR)}" stroke-width="${mw}" pathLength="1" stroke-dasharray="${mf.toFixed(3)} 1"><title>${id === 'rosa' ? 'Family' : you ? 'Your' : esc(who.name) + "'s"} preparedness: ${pct(mf)}</title></path>
         <text class="name" x="${p.x}" y="${ly}" font-size="${you ? ns * 1.15 : ns}" text-anchor="middle">${you ? 'You' : `${esc(who.name)}${small ? '' : `<tspan class="role" font-size="${ls + 1}"> · ${esc(who.role)}</tspan>`}`}</text>
         ${small ? '' : `<g class="where"><rect x="${p.x - pinW / 2}" y="${py}" width="${pinW}" height="${pinH}" rx="${pinH / 2}"/>
           <svg class="pin ms" x="${px}" y="${pc - ic / 2}" width="${ic}" height="${ic}" viewBox="0 -960 960 960"><path d="${PIN}"/></svg>
@@ -170,7 +173,7 @@
           </form>
         </div>
       </section>
-      <aside class="fam-side" id="side">${selected ? profile(selected) : overview()}</aside>
+      <aside class="fam-side" id="side">${selected && selected !== 'giulia' ? profile(selected) : overview()}</aside>
     </div>`;
   }
 
@@ -188,7 +191,7 @@
   function overview() {
     const months = [...new Set(EVENTS.map((e) => e[0]))];
     return `
-      <section class="list-card fam-list" id="list" aria-label="Your list"></section>
+      ${prepCard()}
       <section class="list-card fam-over" aria-label="Overview">
         <div class="list-head"><h2>Overview</h2><span>later this year</span></div>
         ${state.active.length ? `<div class="grp"><p class="grp-t">Services for Rosa</p>${activeList()}</div>` : ''}
@@ -219,6 +222,76 @@
     ${share.length ? `<div class="stack">${share.map((s2) => `<a class="mini" href="#/family/${s2}" data-person="${s2}" title="${esc(PEOPLE[s2].name)}">${mini(s2)}</a>`).join('')}</div>` : ''}</div>`; };
   const connectLabel = (id) => `Connect with ${REL[id][1] ? esc(REL[id][1]) + ' ' : ''}<b>${esc(PEOPLE[id].name)}</b>`;
 
+  /* ---------- preparedness ----------
+     Everyone works through the same list: Rosa's 5 topics, 3 tasks each, shared equally so everyone is prepared.
+     A person's meter = share of the 15 tasks they have done. Rosa's meter = the family average. */
+  const PREP = [
+    { name: 'Wishes', tasks: ['Talk with Rosa about what matters to her', "Read Rosa's wishes in era", 'Know where Rosa wants to live later on'] },
+    { name: 'Health', tasks: ["Know Rosa's medicines and her allergy", "Save Rosa's emergency sheet on your phone", 'Know how to reach Dr. Ferri'] },
+    { name: 'Legal', tasks: ['Know who has power of attorney', "Read Rosa's living will", 'Know where her documents are kept'] },
+    { name: 'Living at home', tasks: ["Walk through Rosa's flat with her", 'Know which services help Rosa at home', 'Agree who checks in on which day'] },
+    { name: 'Money & funding', tasks: ["Know what Rosa's care costs", 'Know which funding Rosa can get', "Know who pays the bills if Rosa can't"] },
+  ];
+  // example progress: what each person has done (1 = done), per topic in the order above
+  const PREP_DONE = {
+    giulia: [[1, 1, 1], [1, 1, 0], [1, 0, 1], [1, 0, 0], [0, 0, 0]],   //  8 of 15 · on the way
+    marco:  [[1, 0, 0], [1, 0, 0], [1, 1, 1], [0, 0, 0], [1, 1, 0]],   //  7 of 15 · on the way
+    sofia:  [[1, 1, 0], [0, 1, 0], [0, 0, 0], [1, 1, 0], [0, 0, 0]],   //  5 of 15 · getting started
+    lucia:  [[0, 0, 0], [1, 1, 0], [0, 0, 0], [0, 0, 1], [0, 0, 0]],   //  3 of 15 · getting started
+  };
+  const PREP_MEMBERS = ['giulia', 'marco', 'sofia', 'lucia'];
+  if (!state.prep) { state.prep = PREP_DONE.giulia.map((t) => t.slice()); save(); }   // your own ticks are kept in the browser
+  const prepOf = (id) => (id === 'giulia' ? state.prep : PREP_DONE[id]);
+  const sum = (a) => a.flat().reduce((n, v) => n + v, 0);
+  const PREP_TOTAL = PREP.reduce((n, t) => n + t.tasks.length, 0);
+  const prepScore = (id) => (id === 'rosa' ? PREP_MEMBERS.reduce((n, m) => n + sum(prepOf(m)), 0) / (PREP_TOTAL * PREP_MEMBERS.length) : sum(prepOf(id)) / PREP_TOTAL);
+  const topicScore = (id, ti) => (id === 'rosa' ? PREP_MEMBERS.reduce((n, m) => n + sum(prepOf(m)[ti]), 0) / (PREP[ti].tasks.length * PREP_MEMBERS.length) : sum(prepOf(id)[ti]) / PREP[ti].tasks.length);
+  const level = (f) => (f >= 0.75 ? { cls: 'well', label: 'Well prepared' } : f >= 0.4 ? { cls: 'way', label: 'On the way' } : { cls: 'start', label: 'Getting started' });
+  const pct = (f) => Math.round(f * 100) + '%';
+  // the bottom half of a circle: from the left, through the bottom, to the right
+  const arcD = (cx, cy, R) => `M${(cx - R).toFixed(1)} ${cy} A ${R.toFixed(1)} ${R.toFixed(1)} 0 0 0 ${(cx + R).toFixed(1)} ${cy}`;
+  // a face with its meter, for the cards
+  function meterFace(id, size) {
+    const f = prepScore(id), q = PEOPLE[id], r = size / 2, R = r + 7, w = 5, W = 2 * (R + w), top = r + 2;
+    return `<svg class="meter-face" width="${W}" height="${top + R + w}" viewBox="${-W / 2} ${-top} ${W} ${top + R + w}" aria-hidden="true">
+      <defs><clipPath id="mf-${id}-${size}"><circle r="${r}"/></clipPath></defs>
+      ${q.photo ? `<image href="${q.photo}" x="${-r}" y="${-r}" width="${size}" height="${size}" clip-path="url(#mf-${id}-${size})" preserveAspectRatio="xMidYMid slice"/>` : `<circle class="mf-bg" r="${r}"/><text class="mf-initial" y="${r * 0.3}" font-size="${r * 0.9}" text-anchor="middle">${esc(q.name[0])}</text>`}
+      <path class="meter-track" d="${arcD(0, 0, R)}" stroke-width="${w}"/>
+      <path class="meter-fill lv-${level(f).cls}" d="${arcD(0, 0, R)}" stroke-width="${w}" pathLength="1" stroke-dasharray="${f.toFixed(3)} 1"/>
+    </svg>`;
+  }
+  const bar = (f) => `<span class="tbar"><i class="lv-${level(f).cls}" style="width:${pct(f)}"></i></span>`;
+  // meter detail in a person's card (Rosa: the family's)
+  function meterBlock(id) {
+    const f = prepScore(id), lv = level(f), rosa = id === 'rosa';
+    return `<div class="pblock meter-block">
+      <h3>${rosa ? 'Family preparedness' : 'Preparedness'}</h3>
+      <div class="meter-head">${meterFace(id, 52)}<div><p class="meter-pct lv-${lv.cls}">${pct(f)}</p><p class="meter-lv">${lv.label}${rosa ? ' · the family on average' : ` · ${sum(prepOf(id))} of ${PREP_TOTAL} tasks`}</p></div></div>
+      <ul class="topic-bars">${PREP.map((t, ti) => { const tf = topicScore(id, ti); return `<li><span class="tname">${t.name}</span>${bar(tf)}<span class="tnum">${rosa ? pct(tf) : `${sum(prepOf(id)[ti])}/${t.tasks.length}`}</span></li>`; }).join('')}</ul>
+      ${rosa ? `<ul class="member-bars">${PREP_MEMBERS.map((m) => `<li><a href="#/family/${m}" data-person="${m}"><span class="mini">${mini(m)}</span><span class="tname">${m === 'giulia' ? 'You' : esc(PEOPLE[m].name)}</span></a>${bar(prepScore(m))}<span class="tnum">${pct(prepScore(m))}</span></li>`).join('')}</ul>` : ''}
+    </div>`;
+  }
+  // your card: your meter, what to do next, and your full to-do list
+  const prepOpen = new Set();   // topics you opened in your list
+  function prepCard() {
+    const f = prepScore('giulia'), lv = level(f);
+    // suggestions: the next unfinished task of each of your weakest topics
+    const next = PREP.map((t, ti) => ({ ti, s: topicScore('giulia', ti), i: state.prep[ti].indexOf(0) })).filter((x) => x.i >= 0).sort((a, b) => a.s - b.s || a.ti - b.ti).slice(0, 3);
+    return `<section class="list-card fam-list prep-card" aria-label="Your preparedness">
+      <div class="list-head"><h2>Your preparedness</h2><span>${sum(state.prep)} of ${PREP_TOTAL} done</span></div>
+      <div class="meter-head">${meterFace('giulia', 60)}<div><p class="meter-pct lv-${lv.cls}">${pct(f)}</p><p class="meter-lv">${lv.label}</p></div></div>
+      ${next.length ? `<div class="grp"><p class="grp-t">Do next to improve</p>${next.map(({ ti, i }) => `
+        <button class="sugg-btn" type="button" data-prepdo="${ti}:${i}"><span class="sugg-t">${esc(PREP[ti].tasks[i])}</span><span class="sugg-topic">${esc(PREP[ti].name)}</span><span class="sugg-done">Done ${icon('check')}</span></button>`).join('')}</div>`
+        : '<p class="meter-lv">You have done everything on your list.</p>'}
+      <div class="grp"><p class="grp-t">Your to-do list</p>
+      ${PREP.map((t, ti) => { const n = sum(state.prep[ti]); return `<details class="ptopic" data-topic="${ti}" ${prepOpen.has(ti) ? 'open' : ''}>
+        <summary><span class="tname">${t.name}</span>${bar(n / t.tasks.length)}<span class="tnum">${n}/${t.tasks.length}</span></summary>
+        ${t.tasks.map((task, i) => `<label class="it ${state.prep[ti][i] ? 'is-done' : ''}"><input type="checkbox" data-prep="${ti}:${i}" ${state.prep[ti][i] ? 'checked' : ''}><span class="box" aria-hidden="true">${icon('check')}</span><span class="it-t">${esc(task)}</span></label>`).join('')}
+      </details>`; }).join('')}
+      </div>
+    </section>`;
+  }
+
   // the person's active services, stacked at the end of their card
   function svcStack(id) {
     const list = svcOf(id).filter((k) => isActive(k));
@@ -239,6 +312,7 @@
           <p class="prel">${esc(REL[id][0])}${INSURED[id] ? ` <span class="sep" aria-hidden="true">·</span> <span class="ins">Per your insurance <b>Allianz</b></span>` : ''}</p>
           <p class="paddr">${esc(ADDR[id])}</p>
         </div>
+        ${meterBlock(id)}
         ${on ? `
           ${APPTS[id].length ? `<div class="pblock"><h3>Upcoming appointments</h3><ul class="appts">${APPTS[id].map(([w, t]) => `<li><span>${w}</span><span>${t}</span></li>`).join('')}</ul></div>` : ''}
           <div class="pblock"><h3>Important documents</h3><ul class="docs">${DOCS[id].map((d2) => `<li><button type="button" data-doc="${esc(d2)}">${esc(d2)}</button></li>`).join('')}</ul></div>
@@ -609,8 +683,9 @@
   function refreshFamily() {
     if (!location.hash.startsWith('#/family')) return;
     $('#map').innerHTML = mapSVG(); applyView();
-    $('#side').innerHTML = selected ? profile(selected) : overview();
-    renderList();
+    const sc = $('.prep-card')?.scrollTop || 0;   // keep your place in your list while ticking
+    $('#side').innerHTML = selected && selected !== 'giulia' ? profile(selected) : overview();
+    if ($('.prep-card')) $('.prep-card').scrollTop = sc;
   }
   window.addEventListener('hashchange', render);
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if ($('#map')) { $('#map').innerHTML = mapSVG(); applyView(); } if ($('#introMap')) { drawIntroMap(); } }, 150); });
@@ -621,6 +696,8 @@
     if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) return;
     e.preventDefault(); playIntro();
   });
+
+  document.addEventListener('toggle', (e) => { const t = e.target.dataset && e.target.dataset.topic; if (t !== undefined) { const n = Number(t); if (e.target.open) prepOpen.add(n); else prepOpen.delete(n); } }, true);
 
   /* ---------- events ---------- */
   let tt;
@@ -633,10 +710,11 @@
     if (selected && window.innerWidth <= 1020) $('#side').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   document.addEventListener('click', (e) => {
-    const t = e.target.closest('[data-person], [data-connect], [data-doc], [data-viewdetails], [data-theme], [data-skip], [data-svcfilter], [data-svcsel], [data-chatact], [data-stop], [data-action], [data-q], [data-check], [data-notify], [data-close]');
+    const t = e.target.closest('[data-person], [data-prepdo], [data-connect], [data-doc], [data-viewdetails], [data-theme], [data-skip], [data-svcfilter], [data-svcsel], [data-chatact], [data-stop], [data-action], [data-q], [data-check], [data-notify], [data-close]');
     if (!t) return;
     const d = t.dataset;
     if (d.person) { pick(d.person); return; }
+    if (d.prepdo) { const [ti, i] = d.prepdo.split(':').map(Number); state.prep[ti][i] = 1; save(); refreshFamily(); toast(`Done — you are now ${pct(prepScore('giulia'))} prepared.`); return; }
     if (d.connect) { openConnect(d.connect); return; }
     if (d.doc) { toast(`${d.doc} opens here (demo).`); return; }
     if (d.viewdetails) { toast(`${PEOPLE[d.viewdetails].name}'s full profile opens here (demo).`); return; }
@@ -670,6 +748,8 @@
   document.addEventListener('input', (e) => { if (e.target.id === 'svcSearch') { svcQuery = e.target.value; renderServices(); } });
   document.addEventListener('change', (e) => {
     const c = e.target.dataset.check;
+    const pr = e.target.dataset.prep;
+    if (pr) { const [ti, i] = pr.split(':').map(Number); state.prep[ti][i] = e.target.checked ? 1 : 0; save(); refreshFamily(); return; }
     if (c) { const [gi, ii] = c.split(':').map(Number); state.checklist[gi].items[ii].done = e.target.checked; state.checklist[gi].items[ii].isNew = false; save(); renderList(); }
   });
   document.addEventListener('submit', (e) => {

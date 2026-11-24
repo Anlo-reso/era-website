@@ -879,3 +879,62 @@ svg.ms, svg.ms path { fill: currentColor !important; stroke: none !important; }
 .map > svg .svcnode:hover, .map > svg .svcnode:focus-visible { opacity: 1; }
 /* with the service buttons, the card's footer scrolls with the rest of the card */
 .fam-side .profile2 .pfoot { position: static; padding-top: 18px; }
+
+/* ===== preparedness meter =====
+   a bottom arc around each face; colour by level: ember (getting started, under 40%),
+   butter (on the way, 40–74%), era Blue (well prepared, 75%+) */
+:root { --lv-start: #EE7246; --lv-way: #F2CF3A; --lv-well: #5B75FE; }
+.map > svg .meter-track, .meter-face .meter-track { fill: none; stroke: #fff; stroke-linecap: round; }
+.map > svg .meter-fill, .meter-face .meter-fill { fill: none; stroke-linecap: round; }
+.map > svg .meter-fill.lv-start, .meter-face .meter-fill.lv-start { stroke: var(--lv-start); }
+.map > svg .meter-fill.lv-way, .meter-face .meter-fill.lv-way { stroke: var(--lv-way); }
+.map > svg .meter-fill.lv-well, .meter-face .meter-fill.lv-well { stroke: var(--lv-well); }
+.meter-face { display: block; flex: none; overflow: visible; }
+.meter-face .meter-track { stroke: #E8E6E7; }
+.meter-face .mf-bg { fill: #EEF2FF; }
+.meter-face .mf-initial { fill: var(--blue-deep); font-family: var(--font); font-weight: 500; }
+.map > svg.enter .meter-fill { animation: fam-draw-meter 1.2s 1.2s cubic-bezier(.4, 0, .2, 1) backwards; }
+@keyframes fam-draw-meter { from { stroke-dasharray: 0 1; } }
+
+.meter-head { display: flex; align-items: center; gap: 16px; }
+.meter-pct { font-size: 1.9rem; line-height: 1.1; font-weight: 400; }
+.meter-pct.lv-start { color: #C9502A; }
+.meter-pct.lv-way { color: #9A7A00; }
+.meter-pct.lv-well { color: var(--blue-deep); }
+.meter-lv { font-size: .85rem; color: #6B6B6B; }
+.tbar { display: block; height: 6px; border-radius: 3px; background: #E8E6E7; overflow: hidden; }
+.tbar i { display: block; height: 100%; border-radius: 3px; }
+.tbar i.lv-start { background: var(--lv-start); }
+.tbar i.lv-way { background: var(--lv-way); }
+.tbar i.lv-well { background: var(--lv-well); }
+.tnum { font-size: .78rem; color: #6B6B6B; text-align: right; font-variant-numeric: tabular-nums; }
+.tname { font-size: .85rem; }
+
+/* in a person's card */
+.meter-block { gap: 12px; }
+.topic-bars, .member-bars { list-style: none; padding: 0; display: grid; gap: 8px; }
+.topic-bars li, .member-bars li { display: grid; grid-template-columns: 120px 1fr 40px; align-items: center; gap: 10px; }
+.member-bars { padding-top: 10px; border-top: 1px solid #F0EFF0; }
+.member-bars a { display: flex; align-items: center; gap: 8px; color: inherit; text-decoration: none; }
+.member-bars .mini { width: 26px; height: 26px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: #EEF2FF; color: var(--blue-deep); font-size: .75rem; flex: none; }
+.member-bars .mini img { width: 100%; height: 100%; object-fit: cover; }
+
+/* your card: suggestions and the to-do list by topic */
+.sugg-btn { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "t d" "s d"; align-items: center; column-gap: 12px; width: 100%; text-align: left; padding: 10px 12px; border: 1.5px solid #E8E6E7; border-radius: 14px; background: #fff; font: inherit; color: var(--charcoal); cursor: pointer; }
+.sugg-btn:hover { border-color: var(--blue); }
+.sugg-t { grid-area: t; font-size: .9375rem; line-height: 1.35; }
+.sugg-topic { grid-area: s; font-size: .75rem; color: #6B6B6B; }
+.sugg-done { grid-area: d; display: inline-flex; align-items: center; gap: 4px; font-size: .78rem; font-weight: 500; color: var(--blue-deep); background: #EEF2FF; padding: 4px 10px; border-radius: 99px; }
+.sugg-done svg { width: 14px; height: 14px; }
+.ptopic { border-radius: 14px; }
+.ptopic + .ptopic { margin-top: 2px; }
+.ptopic summary { display: grid; grid-template-columns: 1fr 90px 32px; align-items: center; gap: 10px; padding: 9px 4px; cursor: pointer; list-style: none; border-radius: 10px; }
+.ptopic summary::-webkit-details-marker { display: none; }
+.ptopic summary::before { content: ""; display: none; }
+.ptopic summary:hover { background: #F7F8FF; }
+.ptopic .tname { font-size: .9375rem; }
+.ptopic[open] summary { margin-bottom: 6px; }
+.ptopic .it + .it { margin-top: 6px; }
+.fam-side .ptopic .it.is-done { background: #F4F4F6; }
+.fam-side .ptopic .it.is-done .it-t { color: #6B6B6B; text-decoration: line-through; }
+@media (min-width: 1021px) { .fam-side .prep-card { flex: 1.5 1 0; } }
