@@ -100,6 +100,38 @@
     <path class="cb-road thin" d="M-900 380 C -500 360, -100 390, 300 380 S 700 350, 900 360"/>
     <path class="cb-rail" d="M-900 470 C -500 430, -150 450, 160 470 C 460 490, 700 470, 900 440"/>
   </g>`;
+  // beyond the drawn centre the town carries on as made-up streets, so the map never ends when you drag or zoom out.
+  // The same every time (a fixed seed); main roads continue outward, and quieter side streets fill the rest.
+  const CITY_FILL = (() => {
+    let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+    const E = 3200, CX = 900, CY0 = -560, CY1 = 700;     // how far the town goes; the box of the drawn centre
+    const wob = (n) => (rnd() - 0.5) * n;
+    // a gently wandering street from (x1,y1) to (x2,y2)
+    const st = (x1, y1, x2, y2, cls) => { const mx = (x1 + x2) / 2 + wob(80), my = (y1 + y2) / 2 + wob(80);
+      return `<path class="cb-road ${cls}" d="M${x1.toFixed(0)} ${y1.toFixed(0)} Q ${mx.toFixed(0)} ${my.toFixed(0)} ${x2.toFixed(0)} ${y2.toFixed(0)}"/>`; };
+    let o = '';
+    // the centre's main roads and railway carry on to the edge of town
+    [[-900, -230, -1], [900, -300, 1], [-900, 90, -1], [900, 70, 1], [-900, 380, -1], [900, 360, 1], [-900, -420, -1]]
+      .forEach(([x, y, d]) => { o += st(x, y, d * E, y + wob(240), y === 380 || y === 360 || y === -420 ? 'thin' : ''); });
+    [[160, 700], [-700, 700], [-680, 700], [520, 700]].forEach(([x, y], i) => { o += st(x, y, x + wob(500), E, i ? 'thin' : ''); });
+    o += st(900, -520, 2200, -1300, '') + st(2200, -1300, E, -1900, '') + st(600, -560, 1300, -1200, 'thin');
+    o += `<path class="cb-rail" d="M-900 470 C -1600 500, -2400 440, -${E} 480 M900 440 C 1600 410, 2400 470, ${E} 430"/>`;
+    // a few more big roads out in the suburbs
+    [-1500, -1000, 1050, 1700].forEach((y) => { o += st(-E, y + wob(120), E, y + wob(120), ''); });
+    [-1900, -1300, 1350, 2000].forEach((x) => { o += st(x + wob(120), -E, x + wob(120), E, ''); });
+    // side streets: everywhere except over the drawn centre
+    for (let y = -E + 120; y < E; y += 230 + wob(60)) {
+      const inCore = y > CY0 && y < CY1;
+      if (inCore) { o += st(-E, y, -CX - 40, y + wob(40), 'thin') + st(CX + 40, y + wob(40), E, y, 'thin'); }
+      else o += st(-E, y, E, y + wob(60), 'thin');
+    }
+    for (let x = -E + 140; x < E; x += 250 + wob(70)) {
+      const inCore = Math.abs(x) < CX;
+      if (inCore) { o += st(x, -E, x + wob(40), CY0 - 40, 'thin') + st(x + wob(40), CY1 + 40, x, E, 'thin'); }
+      else o += st(x, -E, x + wob(60), E, 'thin');
+    }
+    return `<g class="city-bg city-fill" aria-hidden="true">${o}</g>`;
+  })();
 
   // map units → screen pixels; before the map is on the page, estimate it from the window
   function mapZ() {
@@ -112,7 +144,7 @@
     const small = isTablet();
     const z = mapZ(), u = (px) => px / z;           // text sizes in screen pixels, whatever the map's scale
     const ns = u(small ? 13 : 16), ls = u(12.5), ss = u(11.5);
-    let s = CITY_BG;
+    let s = CITY_FILL + CITY_BG;
     // lines to people you are not connected with yet are still and dotted, with a question mark half-way
     const k2q = small ? 1.6 : 1 / z, dots = `stroke-dasharray:0 ${(8 * k2q).toFixed(1)};stroke-width:${(3.5 * k2q).toFixed(1)}`;
     s += `<g class="links">${FAM_LINKS.map(([a, b], i) => { const nc = notYet(a, b);
