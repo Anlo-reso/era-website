@@ -64,79 +64,57 @@
   let state = store.get('state', { active: [], checklist: [] });
   const save = () => store.set('state', state);
 
-  /* ---------- the family map (people where they live, roads, travel times, services) ---------- */
-  // Coordinates follow the Figma frame "Family – Map" (panel 1640×890; the cards cover x > 1212).
+  /* ---------- the family map (Figma "Family" layout) ----------
+     You sit in the middle, in focus; the family sits around you, joined by thin 2px lines.
+     Coordinates are relative to you at (0, 0). `where` = city · travel time from you. */
   const MAPP = {
-    rosa:   { x: 270, y: 270, r: 64, where: 'Home · Bergamo' },
-    lucia:  { x: 500, y: 140, r: 50, where: 'Next door' },
-    sofia:  { x: 760, y: 250, r: 54, where: 'Bergamo · 5 min' },
-    marco:  { x: 300, y: 590, r: 56, where: 'Bergamo · 10 min' },
-    giulia: { x: 900, y: 610, r: 70, where: 'Milano · 50 min' },
+    giulia: { x: 0, y: 0, r: 78, where: 'Milano' },
+    rosa:   { x: -380, y: -200, r: 64, where: 'Bergamo · 50 min' },
+    lucia:  { x: -620, y: -10, r: 46, where: 'Bergamo · 50 min' },
+    sofia:  { x: 410, y: -230, r: 56, where: 'Bergamo · 55 min' },
+    marco:  { x: 390, y: 250, r: 58, where: 'Bergamo · 50 min' },
   };
-  const STOPS = { food: { x: 110, y: 430, label: 'Food delivery' }, car: { x: 600, y: 440, label: 'Driving service' }, home: { x: 1060, y: 150, label: 'Home help' } };
-  const ROADS = [
-    [[1700, 760], 'giulia', 'car', 'rosa', [-80, 150]],
-    ['rosa', 'lucia', [620, -80]],
-    ['rosa', [250, 430], 'marco', [200, 980]],
-    ['rosa', [520, 290], 'sofia', 'home', [1320, -80]],
-    ['marco', [600, 700], 'giulia'],
-    [[-80, 520], 'food', [190, 340], 'rosa'],
-    ['giulia', [960, 990]],
-  ];
+  // services near Rosa, next to her
+  const STOPS = { food: { x: -600, y: -360, label: 'Food delivery' }, home: { x: -100, y: -400, label: 'Home help' }, car: { x: -400, y: 250, label: 'Driving service' } };
+  const FAM_LINKS = [['giulia', 'rosa'], ['giulia', 'sofia'], ['giulia', 'marco'], ['rosa', 'lucia'], ['rosa', 'sofia'], ['rosa', 'food'], ['rosa', 'home'], ['rosa', 'car']];
+  const PEOPLE_ORDER = ['giulia', 'rosa', 'sofia', 'marco', 'lucia'];   // the order they appear in
   let selected = null;
-  // quiet roads and neighbourhoods around the family (outside the area where the people sit)
-  const OUTSKIRTS = (() => {
-    let o = '';
-    const blobs = [[-420, 220, 300, 220], [-380, 980, 260, 200], [1520, -260, 320, 200], [1560, 1040, 300, 220], [420, -380, 340, 180], [520, 1260, 360, 200], [1950, 420, 260, 300], [-760, 560, 220, 300]];
-    o += blobs.map(([cx, cy, rx, ry]) => `<ellipse class="area" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}"/>`).join('');
-    const H = [-560, -300, 1180, 1440], V = [-760, -460, -170, 1360, 1660, 1960, 2260];
-    o += H.map((y0, i) => { const w = i % 2 ? 60 : -60; return `<path class="road far" d="M-1100 ${y0} C -500 ${y0 + w}, 200 ${y0 - w}, 820 ${y0 + w / 2} S 2100 ${y0 - w}, 2800 ${y0 + w}"/>`; }).join('');
-    o += V.map((x0, i) => { const w = i % 2 ? 50 : -50; return `<path class="road far" d="M${x0} -900 C ${x0 + w} -300, ${x0 - w} 300, ${x0 + w / 2} 700 S ${x0 + w} 1500, ${x0} 1900"/>`; }).join('');
-    // the existing roads continue outward
-    o += ['M-80 150 C -300 120, -600 200, -1100 180', 'M-80 520 C -350 560, -700 470, -1100 520', 'M1700 820 C 2000 860, 2400 790, 2800 830', 'M1700 380 C 2000 340, 2400 420, 2800 380', 'M620 -80 C 640 -350, 600 -600, 640 -900', 'M1320 -80 C 1380 -350, 1300 -600, 1360 -900', 'M200 980 C 180 1250, 230 1500, 200 1900', 'M960 990 C 980 1250, 930 1500, 970 1900']
-      .map((d) => `<path class="road" d="${d}"/>`).join('');
-    o += [[-460, 180, 'Valtesse'], [1560, -240, 'Seriate'], [1580, 1060, 'Sesto'], [-380, 1000, 'Curno']].map(([tx, ty, t]) => `<text class="town" x="${tx}" y="${ty}" text-anchor="middle">${t}</text>`).join('');
+  // a quiet street grid in the background, so the grey still reads as a map
+  const TEXTURE = (() => {
+    const blobs = [[-560, -420, 260, 160], [620, -380, 240, 150], [-720, 380, 280, 170], [660, 420, 300, 160], [80, 520, 240, 120]];
+    let o = blobs.map(([cx, cy, rx, ry]) => `<ellipse class="area" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}"/>`).join('');
+    o += [-520, -130, 330, 640].map((y0, i) => { const w = i % 2 ? 50 : -50; return `<path class="road far" d="M-1400 ${y0} C -700 ${y0 + w}, -100 ${y0 - w}, 400 ${y0 + w / 2} S 1100 ${y0 - w}, 1400 ${y0 + w}"/>`; }).join('');
+    o += [-1040, -560, -170, 230, 700, 1080].map((x0, i) => { const w = i % 2 ? 45 : -45; return `<path class="road far" d="M${x0} -900 C ${x0 + w} -400, ${x0 - w} 0, ${x0 + w / 2} 300 S ${x0 + w} 700, ${x0} 900"/>`; }).join('');
     return o;
   })();
-  const pts = (l) => l.map((k) => (Array.isArray(k) ? { x: k[0], y: k[1] } : MAPP[k] || STOPS[k]));
-  function smooth(list, from = 0, to = null) {
-    const p = pts(list); to = to === null ? p.length - 1 : to;
-    let d = `M${p[from].x} ${p[from].y}`;
-    for (let k = from; k < to; k++) {
-      const p0 = p[Math.max(0, k - 1)], p1 = p[k], p2 = p[k + 1], p3 = p[Math.min(p.length - 1, k + 2)];
-      d += ` C${(p1.x + (p2.x - p0.x) / 6).toFixed(1)} ${(p1.y + (p2.y - p0.y) / 6).toFixed(1)} ${(p2.x - (p3.x - p1.x) / 6).toFixed(1)} ${(p2.y - (p3.y - p1.y) / 6).toFixed(1)} ${p2.x} ${p2.y}`;
-    }
-    return d;
+  const at = (k) => MAPP[k] || STOPS[k];
+  // a gently bent line between two places
+  function link(a, b) {
+    const p = at(a), q = at(b), dx = q.x - p.x, dy = q.y - p.y, d = Math.hypot(dx, dy), bend = d * 0.08 * ((a.length + b.length) % 2 ? 1 : -1);
+    const mx = (p.x + q.x) / 2 - dy / d * bend, my = (p.y + q.y) / 2 + dx / d * bend;
+    return `M${p.x} ${p.y} Q ${mx.toFixed(1)} ${my.toFixed(1)} ${q.x} ${q.y}`;
   }
-  function road(a, b) { for (const l of ROADS) { const i = l.indexOf(a), j = l.indexOf(b); if (i >= 0 && j >= 0) return smooth(l, Math.min(i, j), Math.max(i, j)); } return ''; }
-  const routeTo = (id) => (id === 'giulia' ? '' : road('giulia', id) || road('giulia', 'rosa') + ' ' + road('rosa', id));
+  const hasLink = (a, b) => FAM_LINKS.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
+  // from you to the person you picked: directly, or through Rosa
+  const routeTo = (id) => (id === 'giulia' ? '' : hasLink('giulia', id) ? link('giulia', id) : link('giulia', 'rosa') + ' ' + link('rosa', id));
   const textW = (s, size) => s.length * size * 0.52;
+  const PIN = 'M536.5-503.5Q560-527 560-560t-23.5-56.5Q513-640 480-640t-56.5 23.5Q400-593 400-560t23.5 56.5Q447-480 480-480t56.5-23.5ZM480-186q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z';
 
-  function smile(cx, cy, r) {
-    const w = r * 0.34, y = cy + r * 0.27;
-    return `<path class="smile" d="M${cx - w},${y} A${w},${w} 0 0 0 ${cx + w},${y}" stroke-width="${r * 0.11}"/>`;
+  // map units → screen pixels; before the map is on the page, estimate it from the window
+  function mapZ() {
+    if ($('#map')) return mapBox().z;
+    const w = window.innerWidth, small = w <= 1020;
+    const pw = small ? w - 28 : w - 64 - Math.min(460, Math.max(340, w * 0.28)), ph = small ? pw / 1.3 : Math.min(1000, Math.max(600, window.innerHeight - 110));
+    return Math.min(pw / CONTENT.w, ph / CONTENT.h);
   }
-  function tag(x, y, text, size, dark) {
-    const w = textW(text, size) + size * 1.6, h = size * 1.9;
-    return `<g class="tag ${dark ? 'dark' : ''}"><rect x="${x - w / 2}" y="${y - h / 2}" width="${w}" height="${h}" rx="${h / 2}"/><text x="${x}" y="${y + size * 0.35}" font-size="${size}" text-anchor="middle">${text}</text></g>`;
-  }
-
-  function mapSVG() {
+  function mapSVG(enter) {
     const small = window.innerWidth <= 1020;
-    const vb = small ? '-30 40 1230 840' : '0 0 1640 890';
-    const ns = small ? 48 : 19, ls = small ? 30 : 13, ss = small ? 32 : 13;
-    let s = `
-      <path class="area" d="M-60 -40 C 260 -60, 760 -40, 880 120 C 980 260, 760 420, 560 470 C 380 520, 420 760, 150 800 C -40 830, -80 600, -60 -40 Z"/>
-      <path class="area" d="M700 520 C 820 430, 1120 420, 1190 560 C 1250 690, 1100 860, 900 860 C 720 860, 600 640, 700 520 Z"/>
-      <path class="river" d="M-80 690 C 160 640, 380 820, 640 790 S 1040 900, 1700 860"/>
-      <text class="city" x="${small ? 20 : 44}" y="${small ? 110 : 60}" font-size="${small ? 40 : 20}">BERGAMO</text>
-      <text class="city" x="${small ? 980 : 1020}" y="${small ? 860 : 840}" font-size="${small ? 40 : 20}">MILANO</text>`;
-    s += OUTSKIRTS;
-    s += ROADS.map((l) => `<path class="road" d="${smooth(l)}"/>`).join('');
-    // the route to the person you picked draws itself, and a small dot keeps travelling along it
+    const z = mapZ(), u = (px) => px / z;           // text sizes in screen pixels, whatever the map's scale
+    const ns = u(small ? 13 : 16), ls = u(12.5), ss = u(11.5);
+    let s = TEXTURE;
+    s += `<g class="links">${FAM_LINKS.map(([a, b], i) => `<path class="link" d="${link(a, b)}" pathLength="1" style="--i:${i}"/>`).join('')}</g>`;
+    // the route to the person you picked draws itself, and a dashed flow keeps travelling along it
     if (selected) { const d = routeTo(selected); if (d.trim()) s += `<path class="route" d="${d}" pathLength="1"/><path class="route-flow" d="${d}"/>`; }
-    s += [[250, 430], [520, 290], [600, 700], [190, 340]].map(([x, y]) => `<circle class="junction" cx="${x}" cy="${y}" r="7"/>`).join('');
-    s += tag(760, 520, '50 min', ss, selected === 'rosa') + tag(248, 470, '10 min', ss, selected === 'marco') + tag(615, 290, '5 min', ss, selected === 'sofia');
     s += Object.entries(STOPS).map(([k, v]) => {
       const r = small ? 34 : 26, ic = small ? 34 : 24;
       return `
@@ -147,74 +125,68 @@
       </g>`;
     }).join('');
     const defs = Object.entries(MAPP).map(([id, p]) => `<clipPath id="clip-${id}"><circle cx="${p.x}" cy="${p.y}" r="${p.r}"/></clipPath>`).join('');
-    s += ['lucia', 'marco', 'sofia', 'rosa', 'giulia'].map((id) => {
-      const p = MAPP[id], who = PEOPLE[id], name = id === 'giulia' ? 'You' : who.name;
-      const role = id === 'giulia' ? 'Daughter' : who.role;
-      const ly = p.y + p.r + (id === 'giulia' ? 22 : 12) + ns;
-      const pinW = textW(p.where, ls) + ls * 3, pinH = ls * 1.9, py = ly + ls * 0.7;
-      const px = p.x - pinW / 2 + ls * 1.25, pc = py + pinH / 2;
+    s += PEOPLE_ORDER.slice().reverse().map((id) => {
+      const p = MAPP[id], who = PEOPLE[id], you = id === 'giulia';
+      const ly = p.y + p.r + (you ? 22 : 14) + ns;
+      const pinW = textW(p.where, ls) + ls * 2.9, pinH = ls * 2, py = ly + ls * 0.8, pc = py + pinH / 2, ic = ls * 1.25;
+      const px = p.x - pinW / 2 + ls * 0.7;
       return `
-      <g class="person ${selected === id ? 'sel' : ''}" data-person="${id}" role="button" tabindex="0" aria-pressed="${selected === id}" aria-label="${esc(who.name)}, ${esc(role)}, ${esc(p.where)}. Show details">
-        ${selected === id ? `<circle class="sel-ring" cx="${p.x}" cy="${p.y}" r="${p.r + 9}"/>` : ''}
-        ${id === 'giulia' && selected !== id ? `<circle class="you-ring" cx="${p.x}" cy="${p.y}" r="${p.r + 4}"/>` : ''}
+      <g class="person ${selected === id ? 'sel' : ''} ${you ? 'is-you' : ''}" data-person="${id}" role="button" tabindex="0" style="--i:${PEOPLE_ORDER.indexOf(id)}" aria-pressed="${selected === id}" aria-label="${you ? 'You' : `${esc(who.name)}, ${esc(who.role)}`}, ${esc(p.where)}. Show details">
+        ${selected === id || (you && !selected) ? `<circle class="sel-ring" cx="${p.x}" cy="${p.y}" r="${p.r + 6}"/>` : ''}
         <circle class="halo" cx="${p.x}" cy="${p.y}" r="${p.r + 16}"/><circle class="edge" cx="${p.x}" cy="${p.y}" r="${p.r + 1}"/>
         ${who.photo
     ? `<image href="${who.photo}" x="${p.x - p.r}" y="${p.y - p.r}" width="${p.r * 2}" height="${p.r * 2}" clip-path="url(#clip-${id})" preserveAspectRatio="xMidYMid slice"/>`
     : `<circle class="initial-bg" cx="${p.x}" cy="${p.y}" r="${p.r}"/><text class="initial" x="${p.x}" y="${p.y + p.r * 0.12}" font-size="${p.r * 0.8}" text-anchor="middle">${esc(who.name[0])}</text>`}
-
-        <text class="name" x="${p.x}" y="${ly}" font-size="${ns}" text-anchor="middle">${esc(name)}${small ? '' : `<tspan class="role" font-size="${ls + 1}"> · ${esc(role)}</tspan>`}</text>
+        <text class="name" x="${p.x}" y="${ly}" font-size="${you ? ns * 1.15 : ns}" text-anchor="middle">${you ? 'You' : `${esc(who.name)}${small ? '' : `<tspan class="role" font-size="${ls + 1}"> · ${esc(who.role)}</tspan>`}`}</text>
         ${small ? '' : `<g class="where"><rect x="${p.x - pinW / 2}" y="${py}" width="${pinW}" height="${pinH}" rx="${pinH / 2}"/>
-          <circle class="pin" cx="${px}" cy="${pc - ls * 0.12}" r="${ls * 0.36}"/>
-          <path class="pin" d="M${px - ls * 0.3} ${pc + ls * 0.05} L${px} ${pc + ls * 0.5} L${px + ls * 0.3} ${pc + ls * 0.05}Z"/>
-          <text x="${p.x + ls * 0.6}" y="${pc + ls * 0.35}" font-size="${ls}" text-anchor="middle">${esc(p.where)}</text></g>`}
+          <svg class="pin ms" x="${px}" y="${pc - ic / 2}" width="${ic}" height="${ic}" viewBox="0 -960 960 960"><path d="${PIN}"/></svg>
+          <text x="${px + ic + ls * 0.35}" y="${pc + ls * 0.36}" font-size="${ls}">${esc(p.where)}</text></g>`}
       </g>`;
     }).join('');
-    return `<svg viewBox="${vb}" preserveAspectRatio="xMinYMin meet" role="group" aria-label="Map of Rosa's family and where they live"><defs>${defs}</defs>${s}</svg>`;
+    return `<svg class="${enter ? 'enter' : ''}" role="group" aria-label="Map of Rosa's family around you"><defs>${defs}</defs>${s}</svg>`;
   }
 
   function family() {
     return `
-    <section class="panel" aria-label="Rosa's family">
-      <div class="map" id="map">${mapSVG()}</div>
-      <p class="panel-title">Rosa's circle of care · 5 people</p>
-      <div class="map-toast" id="mapToast" role="status" aria-live="polite"></div>
-      <div class="ask">
-        <span class="bot" aria-hidden="true"><svg viewBox="0 0 100 80"><path d="M28 14v12M72 14v12M18 46 A32 32 0 0 0 82 46"/></svg></span>
-        <form data-ask>
-          <label class="sr-only" for="ask">Ask era</label>
-          <input id="ask" type="text" placeholder="How can I help you?" autocomplete="off">
-          <button class="go" type="submit" aria-label="Ask">${icon('arrow')}</button>
-        </form>
-      </div>
-      <div class="side" id="side">${selected ? profile(selected) : overview()}</div>
-    </section>`;
-  }
-
-  function readyArc() {
-    const done = TOPICS.filter((t) => t[1] === 'ready').length, frac = done / TOPICS.length;
-    const r = 26, c = 2 * Math.PI * r;
-    return `<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="${r}" stroke="#EEF2FF" stroke-width="7"/>
-      <circle cx="32" cy="32" r="${r}" stroke="#5B75FE" stroke-width="7" stroke-dasharray="${c * frac} ${c}" transform="rotate(-90 32 32)"/></svg>`;
+    <div class="fam">
+      <section class="fam-map" aria-label="Rosa's family">
+        <p class="panel-title">Rosa's circle of care · 5 people</p>
+        <div class="map" id="map">${mapSVG(true)}</div>
+        <div class="map-toast" id="mapToast" role="status" aria-live="polite"></div>
+        <div class="ask">
+          <span class="bot" aria-hidden="true"><svg viewBox="0 0 100 80"><path d="M28 14v12M72 14v12M18 46 A32 32 0 0 0 82 46"/></svg></span>
+          <form data-ask>
+            <label class="sr-only" for="ask">Ask era</label>
+            <input id="ask" type="text" placeholder="How can I help you?" autocomplete="off">
+            <button class="go" type="submit" aria-label="Ask">${icon('arrow')}</button>
+          </form>
+        </div>
+      </section>
+      <aside class="fam-side" id="side">${selected ? profile(selected) : overview()}</aside>
+    </div>`;
   }
 
   function activeList() {
     return state.active.map((a) => `<div class="active"><span class="dot"></span><span>${esc(a.text)}<br><span class="muted small">${esc(a.when)}</span></span></div>`).join('');
   }
 
+  // what is coming up for the family, grouped by month
+  const EVENTS = [
+    ['November', 'Thu 26', 'Dr. Ferri (GP) — check-up, 10:00', 'You go with Rosa'],
+    ['December', 'Fri 4', 'Notary — power of attorney, 15:00', 'Marco goes with Rosa'],
+    ['December', 'Tue 8', 'Cardiologist — heart check, 9:30', 'Rosa'],
+    ['December', 'Every Wed', 'Sofia visits Nonna', 'Tech help with the phone'],
+  ];
   function overview() {
+    const months = [...new Set(EVENTS.map((e) => e[0]))];
     return `
-      <article class="card rosa-card">
-        <div class="rosa-head"><img src="${PEOPLE.rosa.photo}" alt=""><div><p class="h2">Rosa, 78</p><p class="small muted">Lives alone in her flat · Bergamo</p></div></div>
-        <div class="ready">${readyArc()}<div><p class="big">2 of 5</p><p class="small muted">topics are ready</p></div></div>
-        <ul class="topics">${TOPICS.map(([n, s]) => `<li><span>${n}</span><span class="chip ${CHIP[s][0]}">${CHIP[s][1]}</span></li>`).join('')}</ul>
-      </article>
-      <article class="card">
-        <p class="eyebrow">Your next step</p>
-        <p class="title">Talk with Rosa about living at home.</p>
-        <p class="muted">Rosa wants to stay in her flat. Nobody in the family looks after this topic yet.</p>
-        <a class="btn btn-line" href="#/steps" data-q="How can Rosa keep living at home?">Know more ${icon('arrow')}</a>
-      </article>
-      ${state.active.length ? `<article class="card"><p class="eyebrow">Active services</p>${activeList()}</article>` : ''}`;
+      <section class="list-card fam-list" id="list" aria-label="Your list"></section>
+      <section class="list-card fam-over" aria-label="Overview">
+        <div class="list-head"><h2>Overview</h2><span>later this year</span></div>
+        ${state.active.length ? `<div class="grp"><p class="grp-t">Services for Rosa</p>${activeList()}</div>` : ''}
+        ${months.map((m) => `<div class="grp"><p class="grp-t">${m}</p><ul class="events">${EVENTS.filter((e) => e[0] === m).map(([, day, what, who]) => `
+          <li><span class="ev-day">${esc(day)}</span><span><span class="ev-what">${esc(what)}</span><span class="ev-who">${esc(who)}</span></span></li>`).join('')}</ul></div>`).join('')}
+      </section>`;
   }
 
   // Person card, as on the Figma board:
@@ -241,6 +213,7 @@
     const title = id === 'rosa' ? `Mum | ${p.full}` : p.full;
     return `
       <article class="card profile2 ${on ? 'is-on' : ''}" aria-label="${esc(p.name)}'s details">
+        <button class="back" type="button" data-person="${id}">${icon('back')} Overview</button>
         <div class="banner">${p.photo ? `<img src="${p.photo}" alt="${esc(p.full)}" style="object-position:${FOCUS[id] || '50% 40%'}">` : `<span class="initial-xl" aria-hidden="true">${esc(p.name[0])}</span>`}</div>
         <div class="pinfo">
           <h2 class="pname">${esc(title)}</h2>
@@ -279,22 +252,21 @@
     t.classList.add('show'); clearTimeout(mtt); mtt = setTimeout(() => t.classList.remove('show'), 4200);
   }
 
-  /* ---------- the map can be dragged, and glides to the person you pick ---------- */
+  /* ---------- the map can be dragged; it always opens with you in the middle ---------- */
   let view = null, viewAnim = 0;
-  const mapBase = () => (window.innerWidth <= 1020 ? { x: -30, y: 40, h: 840 } : { x: 0, y: 0, h: 890 });
-  function mapBox() { const m = $('#map'), r = m ? m.getBoundingClientRect() : { width: 1640, height: 890 }, b = mapBase(), z = (r.height || 890) / b.h; return { b, z, w: (r.width || 1640) / z, h: b.h, pw: r.width || 1640 }; }
-  function clampView(v, mb) { const minX = -700, maxX = Math.max(minX, 1640 + 700 - mb.w), minY = mb.b.y - 480, maxY = mb.b.y + 480; return { x: Math.min(Math.max(v.x, minX), maxX), y: Math.min(Math.max(v.y, minY), maxY) }; }
-  function applyView() { const s2 = $('#map > svg'); if (!s2) return; const mb = mapBox(); if (!view) view = { x: mb.b.x, y: mb.b.y }; view = clampView(view, mb); s2.setAttribute('viewBox', `${view.x.toFixed(1)} ${view.y.toFixed(1)} ${mb.w.toFixed(1)} ${mb.h}`); s2.setAttribute('preserveAspectRatio', 'xMinYMin meet'); }
-  function focusOn(id) {
+  const CONTENT = { w: 1700, h: 1000 };   // the family around you, with room for names and pills
+  function mapBox() { const m = $('#map'), r = m ? m.getBoundingClientRect() : { width: 1200, height: 800 }, pw = r.width || 1200, ph = r.height || 800, z = Math.min(pw / CONTENT.w, ph / CONTENT.h); return { z, w: pw / z, h: ph / z }; }
+  const baseView = (mb) => ({ x: -mb.w / 2, y: -mb.h / 2 + 30 });
+  const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
+  function clampView(v, mb) { const b = baseView(mb); return { x: clamp(v.x, b.x - 450, b.x + 450), y: clamp(v.y, b.y - 320, b.y + 320) }; }
+  function applyView() { const s2 = $('#map > svg'); if (!s2) return; const mb = mapBox(); if (!view) view = baseView(mb); view = clampView(view, mb); s2.setAttribute('viewBox', `${view.x.toFixed(1)} ${view.y.toFixed(1)} ${mb.w.toFixed(1)} ${mb.h.toFixed(1)}`); s2.setAttribute('preserveAspectRatio', 'xMidYMid meet'); }
+  // everyone fits in view, so picking someone just glides the map back to you in the middle
+  function focusOn() {
     if (!$('#map')) return;
-    const mb = mapBox(), small = window.innerWidth <= 1020, side = small ? 0 : ($('#side')?.offsetWidth || 0) + 40;
-    // show the picked person AND you, so the route between you stays in view
-    let fx = id ? MAPP[id].x : 0, fy = id ? MAPP[id].y : 0;
-    if (id && id !== 'giulia') { const visW = (mb.pw - side) / mb.z - 260, dx = MAPP.giulia.x - fx; fx += Math.sign(dx) * Math.min(Math.abs(dx) / 2, Math.max(0, visW / 2)); fy = (fy + MAPP.giulia.y) / 2; }
-    const to = clampView(id ? { x: fx - ((mb.pw - side) / 2) / mb.z, y: fy - mb.h / 2 } : { x: mb.b.x, y: mb.b.y }, mb);
+    const to = baseView(mapBox());
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || !view) { view = to; applyView(); return; }
     cancelAnimationFrame(viewAnim);
-    const from = { ...view }, t0 = performance.now(), D = 700;
+    const from = { ...view }, t0 = performance.now(), D = 600;
     const step = (t) => { const k = Math.min(1, (t - t0) / D), e = 1 - Math.pow(1 - k, 3); view = { x: from.x + (to.x - from.x) * e, y: from.y + (to.y - from.y) * e }; applyView(); if (k < 1) viewAnim = requestAnimationFrame(step); };
     viewAnim = requestAnimationFrame(step);
   }
@@ -598,7 +570,6 @@
   const PAGES = { login, family, steps, services, help, privacy };
   const TITLES = { login: 'Welcome', family: "Rosa's family", steps: 'Your steps', services: 'Services', help: 'Help desk', privacy: 'Privacy Policy' };
   function render() {
-    closeMenu();
     const [route0, sub] = location.hash.replace(/^#\/?/, '').split('/');
     const route = PAGES[route0] ? route0 : 'login';
     if (route === 'family') selected = sub && PEOPLE[sub] ? sub : null;
@@ -607,24 +578,20 @@
     document.title = 'era – ' + TITLES[route];
     $('#main').innerHTML = PAGES[route](sub);
     if (route === 'steps') { renderChat(); renderList(); if (pending) { const q = pending; pending = null; ask(q); } }
-    if (route === 'services') { renderServices(); if (sub) $('#svc-' + sub)?.scrollIntoView({ block: 'center' }); }
+    if (route === 'services') { renderServices(); if (sub === 'search') $('#svcSearch')?.focus(); else if (sub) $('#svc-' + sub)?.scrollIntoView({ block: 'center' }); }
     if (route === 'login') playIntro(); else stopIntro();
-    if (route === 'family') { view = null; applyView(); if (selected) focusOn(selected); }
+    if (route === 'family') { view = null; applyView(); renderList(); }
     window.scrollTo(0, 0);
   }
   function refreshFamily() {
     if (!location.hash.startsWith('#/family')) return;
     $('#map').innerHTML = mapSVG(); applyView();
     $('#side').innerHTML = selected ? profile(selected) : overview();
+    renderList();
   }
   window.addEventListener('hashchange', render);
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if ($('#map')) { $('#map').innerHTML = mapSVG(); applyView(); } if ($('#introMap')) { drawIntroMap(); } }, 150); });
 
-  /* services menu */
-  const svcBtn = $('#svcBtn'), svcMenu = $('#svcMenu');
-  function closeMenu() { svcMenu.hidden = true; svcBtn.setAttribute('aria-expanded', 'false'); }
-  svcBtn.addEventListener('click', (e) => { e.stopPropagation(); const open = svcMenu.hidden; svcMenu.hidden = !open; svcBtn.setAttribute('aria-expanded', String(open)); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
   // R replays the login intro (for demos) — but not while typing in a field or with a modifier key held
   document.addEventListener('keydown', (e) => {
     if (e.key.toLowerCase() !== 'r' || e.repeat || e.metaKey || e.ctrlKey || e.altKey || !$('#intro')) return;
@@ -639,11 +606,10 @@
   function pick(id) {
     selected = selected === id ? null : id;
     history.replaceState(null, '', selected ? '#/family/' + selected : '#/family');
-    refreshFamily(); focusOn(selected);
+    refreshFamily(); focusOn();
     if (selected && window.innerWidth <= 1020) $('#side').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   document.addEventListener('click', (e) => {
-    if (!e.target.closest('.has-menu')) closeMenu();
     const t = e.target.closest('[data-person], [data-connect], [data-doc], [data-viewdetails], [data-theme], [data-skip], [data-svcfilter], [data-svcsel], [data-chatact], [data-stop], [data-action], [data-q], [data-check], [data-notify], [data-close]');
     if (!t) return;
     const d = t.dataset;
