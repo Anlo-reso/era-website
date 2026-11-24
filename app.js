@@ -79,14 +79,6 @@
   const FAM_LINKS = [['giulia', 'rosa'], ['giulia', 'sofia'], ['giulia', 'marco'], ['rosa', 'lucia'], ['rosa', 'sofia'], ['rosa', 'food'], ['rosa', 'home'], ['rosa', 'car']];
   const PEOPLE_ORDER = ['giulia', 'rosa', 'sofia', 'marco', 'lucia'];   // the order they appear in
   let selected = null;
-  // a quiet street grid in the background, so the grey still reads as a map
-  const TEXTURE = (() => {
-    const blobs = [[-560, -420, 260, 160], [620, -380, 240, 150], [-720, 380, 280, 170], [660, 420, 300, 160], [80, 520, 240, 120]];
-    let o = blobs.map(([cx, cy, rx, ry]) => `<ellipse class="area" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}"/>`).join('');
-    o += [-520, -130, 330, 640].map((y0, i) => { const w = i % 2 ? 50 : -50; return `<path class="road far" d="M-1400 ${y0} C -700 ${y0 + w}, -100 ${y0 - w}, 400 ${y0 + w / 2} S 1100 ${y0 - w}, 1400 ${y0 + w}"/>`; }).join('');
-    o += [-1040, -560, -170, 230, 700, 1080].map((x0, i) => { const w = i % 2 ? 45 : -45; return `<path class="road far" d="M${x0} -900 C ${x0 + w} -400, ${x0 - w} 0, ${x0 + w / 2} 300 S ${x0 + w} 700, ${x0} 900"/>`; }).join('');
-    return o;
-  })();
   const at = (k) => MAPP[k] || STOPS[k];
   // a gently bent line between two places
   function link(a, b) {
@@ -111,7 +103,7 @@
     const small = window.innerWidth <= 1020;
     const z = mapZ(), u = (px) => px / z;           // text sizes in screen pixels, whatever the map's scale
     const ns = u(small ? 13 : 16), ls = u(12.5), ss = u(11.5);
-    let s = TEXTURE;
+    let s = '';
     s += `<g class="links">${FAM_LINKS.map(([a, b], i) => `<path class="link" d="${link(a, b)}" pathLength="1" style="--i:${i}"/>`).join('')}</g>`;
     // the route to the person you picked draws itself, and a dashed flow keeps travelling along it
     if (selected) { const d = routeTo(selected); if (d.trim()) s += `<path class="route" d="${d}" pathLength="1"/><path class="route-flow" d="${d}"/>`; }
@@ -154,11 +146,11 @@
         <div class="map" id="map">${mapSVG(true)}</div>
         <div class="map-toast" id="mapToast" role="status" aria-live="polite"></div>
         <div class="ask">
-          <span class="bot" aria-hidden="true"><svg viewBox="0 0 100 80"><path d="M28 14v12M72 14v12M18 46 A32 32 0 0 0 82 46"/></svg></span>
+          <span class="bot" aria-hidden="true"><img src="assets/ui/bot-face.svg" width="53.3439" height="42.0934" alt=""></span>
           <form data-ask>
             <label class="sr-only" for="ask">Ask era</label>
-            <input id="ask" type="text" placeholder="How can I help you?" autocomplete="off">
-            <button class="go" type="submit" aria-label="Ask">${icon('arrow')}</button>
+            <input id="ask" type="text" placeholder="how can I help you?" autocomplete="off">
+            <button class="send" type="submit" aria-label="Ask"><img src="assets/ui/send.svg" width="45" height="45" alt=""></button>
           </form>
         </div>
       </section>

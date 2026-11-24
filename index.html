@@ -7,16 +7,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,300..700&family=DM+Sans:opsz,wght@9..40,300..700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=28">
+  <link rel="stylesheet" href="styles.css?v=31">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
 
   <header class="top">
     <div class="wrap top-in">
-      <a class="logo" href="#/family" aria-label="era – family overview"><img src="assets/era-logo.svg" alt="era"></a>
+      <a class="logo" href="#/family" aria-label="era – family overview"><img src="assets/ui/era-logo.svg" width="86.4" height="54" alt="era"></a>
       <nav class="nav" aria-label="Main">
-        <a href="#/services/search" class="nav-search"><svg class="ms" viewBox="0 -960 960 960" aria-hidden="true"><path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/></svg>Search</a>
+        <a href="#/services/search" class="nav-search"><img src="assets/ui/search.svg" width="24" height="24" alt="">Search</a>
         <a href="#/steps" data-nav="steps">Your steps</a>
         <a href="#/family" data-nav="family">Family</a>
         <a href="#/services" data-nav="services">Services</a>
@@ -24,12 +24,12 @@
       </nav>
       <div class="tools">
         <div class="textsize" role="group" aria-label="Text size">
-          <button type="button" id="tsDown" aria-label="Smaller text"><svg class="ms" viewBox="0 -960 960 960" aria-hidden="true"><path d="M200-440v-80h560v80H200Z"/></svg></button>
+          <button type="button" id="tsDown" aria-label="Smaller text"><img src="assets/ui/minus.svg" width="40" height="40" alt=""></button>
           <span aria-hidden="true">Aa</span>
-          <button type="button" id="tsUp" aria-label="Larger text"><svg class="ms" viewBox="0 -960 960 960" aria-hidden="true"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg></button>
+          <button type="button" id="tsUp" aria-label="Larger text"><img src="assets/ui/plus.svg" width="40" height="40" alt=""></button>
         </div>
         <button type="button" class="urgent" id="urgentBtn">Urgent help</button>
-        <a class="me" href="#/family/giulia" aria-label="Your profile: Andrea, 1 new update"><img src="assets/people/giulia.jpg" alt=""><span class="me-dot" aria-hidden="true"></span></a>
+        <a class="me" href="#/family/giulia" aria-label="Your profile: Andrea"><img src="assets/people/giulia.jpg" alt=""><span class="me-smile" aria-hidden="true"><img src="assets/ui/smile.svg" width="32" height="32" alt=""></span></a>
       </div>
     </div>
   </header>
@@ -75,6 +75,6 @@
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=33"></script>
+  <script src="app.js?v=34"></script>
 </body>
 </html>

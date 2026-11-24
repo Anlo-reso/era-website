@@ -770,3 +770,74 @@ svg.ms, svg.ms path { fill: currentColor !important; stroke: none !important; }
   .fam-map .ask { position: relative; left: auto; bottom: auto; width: 100%; }
   .fam-side .list-card { flex: none; overflow: visible; }
 }
+
+/* ===== Figma "connected + details" (branding_era, node 320:2211), frame 1728 × 1117 =====
+   header 180px tall · grey family panel · right column 452px with "Your list" and "Overview" */
+:root { --head-h: clamp(84px, 10.4vw, 180px); }
+.wrap { max-width: 1728px; padding: 0 clamp(16px, 2.5vw, 43px); }
+.top .wrap { padding: 0 clamp(16px, 4.2vw, 72px); }
+.top .top-in { min-height: var(--head-h); gap: clamp(16px, 2.1vw, 36px); }
+.logo img { width: 86.4px; height: 54px; }
+.top .nav { gap: clamp(14px, 2.3vw, 40px); }
+.top .nav a { padding: 0; min-height: 0; font-size: 1.125rem; color: var(--charcoal); background: none; border-radius: 0; }
+.top .nav a:hover { color: var(--blue-deep); background: none; }
+.top .nav [aria-current="page"] { font-weight: 600; color: var(--charcoal); }
+.top .nav .nav-search { display: inline-flex; align-items: center; gap: 8px; padding: 6px; background: #fff; border-radius: 99px; }
+.nav-search img { display: block; flex: none; }
+.top .tools { gap: clamp(14px, 2.1vw, 36px); }
+.top .textsize { display: inline-flex; align-items: center; gap: 12px; padding: 6px; background: #fff; border-radius: 99px; color: var(--charcoal); }
+.top .textsize span { display: inline; font-size: 1.125rem; }
+.top .textsize button { width: 40px; height: 40px; padding: 0; border: 0; background: none; border-radius: 50%; display: block; cursor: pointer; }
+.top .textsize button img { display: block; }
+.top .textsize button:disabled { opacity: .45; }
+.top .urgent { min-height: 0; padding: 20px 32px; border-radius: 99px; background: #FDFE86; font-size: 1.125rem; font-weight: 500; line-height: normal; }
+.top .urgent:hover { background: #F7F86A; }
+.top .me { position: relative; width: clamp(56px, 4.9vw, 84px); height: clamp(56px, 4.9vw, 84px); overflow: visible; }
+.top .me > img:first-child { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.top .me .me-smile { position: absolute; top: 63.33%; right: 33%; bottom: 19.67%; left: 33%; }
+.top .me .me-smile img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; max-width: none; border-radius: 0; }
+
+/* family: panel and right column fill the screen under the header */
+.fam { grid-template-columns: minmax(0, 1fr) clamp(340px, 26.2vw, 452px); gap: clamp(20px, 2.3vw, 40px); height: calc(100vh - var(--head-h) - 47px); min-height: 560px; max-height: none; margin-top: 6px; padding-bottom: 0; }
+.fam-side { gap: 20px; }
+.fam-side .list-card, .fam-side .profile2 { border: 1.5px solid #E8E6E7; border-radius: 28px; }
+.fam-side .list-card { padding: 24px 26px; gap: 14px; }
+.fam-side .list-head { align-items: center; }
+.fam-side .list-head h2 { font-size: 1.5rem; font-weight: 400; line-height: 1.35; }
+.fam-side .list-head span { font-size: .875rem; font-weight: 500; color: #6B6B6B; }
+.fam-side .bar { height: 8px; border-radius: 4px; background: #E8E6E7; }
+.fam-side .bar span { border-radius: 4px; }
+.fam-side .grp { gap: 10px; }
+.fam-side .grp-t { font-size: .75rem; letter-spacing: 0; color: #6B6B6B; font-weight: 500; line-height: 1.35; }
+.fam-side .it { background: #EEF2FF; border-radius: 14px; padding: 10px 12px; gap: 12px; font-size: .9375rem; line-height: 1.35; }
+.fam-side .it .box { width: 24px; height: 24px; border: 1.5px solid #C9CDDA; border-radius: 12px; }
+.fam-side .it .new { font-size: 11px; padding: 2px 8px; line-height: 1.35; }
+
+/* the assistant, bottom-left on the panel */
+.fam-map .ask { left: 24px; bottom: 24px; gap: 20px; width: auto; min-width: 0; }
+.fam-map .bot { position: relative; display: block; width: 73px; height: 73px; border-radius: 15px; background: #fff; box-shadow: none; }
+.fam-map .bot::after { display: none; }
+.fam-map .bot img { position: absolute; left: 10.07px; top: 20.14px; display: block; }
+.fam-map .ask form { flex: none; width: 245px; height: 64px; padding: 10px 10px 10px 32px; border-radius: 99px; background: #fff; box-shadow: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.fam-map .ask form:focus-within { box-shadow: 0 0 0 2px var(--blue); }
+.fam-map .ask input { font-size: .875rem; min-height: 0; color: var(--charcoal); }
+.fam-map .ask input::placeholder { color: #3A3F55; }
+.fam-map .send { flex: none; width: 45px; height: 45px; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; }
+.fam-map .send img { display: block; }
+.fam-map .send:hover { filter: brightness(.92); }
+
+@media (max-width: 1020px) {
+  .fam { height: auto; min-height: 0; }
+  .fam-map .ask { left: auto; bottom: auto; }
+  /* on the white page (not the grey panel) the white boxes get a thin outline */
+  .fam-map .bot, .fam-map .ask form { box-shadow: 0 0 0 1.5px #E8E6E7; }
+  .fam-map .ask form { flex: 1; width: auto; }
+}
+@media (max-width: 820px) {
+  :root { --head-h: 68px; }
+  .logo img { width: 54.4px; height: 34px; }
+  .top .urgent { padding: 11px 16px; font-size: .9rem; }
+  .top .textsize { gap: 6px; padding: 2px; }
+  .top .textsize span { display: none; }
+  .top .textsize button, .top .textsize button img { width: 34px; height: 34px; }
+}
