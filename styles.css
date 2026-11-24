@@ -977,3 +977,17 @@ body.is-login .site-foot { display: none; }
   .ft-brand { grid-column: 1 / -1; }
 }
 @media (max-width: 767px) { .site-foot { display: none; } }
+
+/* ===== one button size everywhere =====
+   Every real button: 48px tall, 15px text (scales with Aa), regular weight, 24px side padding, 12px corners.
+   Colour stays with the situation (blue, charcoal, white outline); width stays as each place needs it.
+   Chat suggestion chips and the header's Urgent help keep their own, smaller styles. */
+.btn, .connect, .view-btn, .ask-btn, .pill, .join-btn {
+  min-height: 48px; height: auto; padding: 0 24px; font-size: var(--t-body); font-weight: 400; line-height: 1.2;
+  border-radius: var(--r); display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+}
+.view-btn, .connect { display: flex; }
+/* outline buttons share one border */
+.btn-line, .view-btn, .ask-btn, .pill-line { border: 1px solid rgba(47, 47, 47, .2); }
+.btn-dark, .connect, .pill-blue, .join-btn { border: 1px solid transparent; }
+.connect b { font-weight: 600; }
