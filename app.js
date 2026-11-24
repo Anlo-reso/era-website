@@ -49,10 +49,10 @@
   const TOPICS = [['Wishes', 'ready'], ['Health', 'almost'], ['Legal', 'ready'], ['Living at home', 'todo'], ['Money & funding', 'todo']];
   const CHIP = { ready: ['chip-ready', 'Ready'], almost: ['chip-almost', 'Almost ready'], todo: ['chip-todo', 'Not started'] };
   const SERVICE_DONE = {
-    food: { text: 'Lunch delivery — Pranzo a Casa', when: 'Every day at 12:00 · starts tomorrow', toast: 'Lunch is ordered for Rosa. It arrives tomorrow at 12:00.' },
-    drive: { text: 'Driving service — Bus Amico', when: 'Thu 26 Nov · pick-up 9:30 to Dr. Ferri', toast: 'A driver picks Rosa up on Thursday at 9:30.' },
-    assist: { text: 'Daily care assistant — Casa Serena', when: 'First visit Mon 30 Nov · 9:00', toast: 'Casa Serena will call you to plan the first visit.' },
-    funding: { text: 'Home adjustment funding', when: 'Application started · a care advisor checks it', toast: 'Your funding application is started. A care advisor will call you.' },
+    food: { soon: 'tomorrow 12:00', text: 'Lunch delivery — Pranzo a Casa', when: 'Every day at 12:00 · starts tomorrow', toast: 'Lunch is ordered for Rosa. It arrives tomorrow at 12:00.' },
+    drive: { soon: 'Thu 9:30', text: 'Driving service — Bus Amico', when: 'Thu 26 Nov · pick-up 9:30 to Dr. Ferri', toast: 'A driver picks Rosa up on Thursday at 9:30.' },
+    assist: { soon: 'Mon 9:00', text: 'Daily care assistant — Casa Serena', when: 'First visit Mon 30 Nov · 9:00', toast: 'Casa Serena will call you to plan the first visit.' },
+    funding: { soon: 'in review', text: 'Home adjustment funding', when: 'Application started · a care advisor checks it', toast: 'Your funding application is started. A care advisor will call you.' },
   };
   const SERVICES = [
     { id: 'food', icon: 'food', name: 'Food delivery', who: 'Pranzo a Casa', what: 'A warm lunch at the door, every day.', dist: '600 m from Rosa', cost: 'First week free' },
@@ -465,10 +465,9 @@
     grid.innerHTML = list.length ? list.map((s) => {
       const on = isActive(s.id);
       return `<article class="svc2 ${on ? 'is-active' : ''} ${svcSel === s.id ? 'is-sel' : ''}" id="svc-${s.id}" data-svcsel="${s.id}">
-        <div class="svc2-top"><span class="svc2-ico">${icon(s.icon)}</span><span class="dist">${icon('pin')} ${s.dist}</span></div>
-        <div><h3>${s.name}</h3><p class="sub">${s.who} · ${s.cost}</p></div>
-        <p class="what">${s.what}</p>
-        ${on ? `<p class="active-pill"><i></i>Active for Rosa · ${SERVICE_DONE[s.id].when.split('·')[0].trim()}</p>`
+        ${s.img ? `<img class="svc2-img" src="${s.img}" alt="">` : '<div class="svc2-img" aria-hidden="true"></div>'}
+        <div class="svc2-text"><h3>${s.name}</h3><p class="what">${s.what}</p></div>
+        ${on ? `<p class="active-pill"><i></i>Active for Rosa · ${SERVICE_DONE[s.id].soon}</p>`
              : `<button class="ask-btn" type="button" data-action="${SERVICE_DONE[s.id] ? s.id : 'svc-' + s.id}" data-who="rosa">Ask for this ${icon('arrow')}</button>`}
       </article>`;
     }).join('') : '<p class="empty">No service matches. Try another word, or ask era.</p>';
