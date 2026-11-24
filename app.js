@@ -508,45 +508,26 @@
 
   /* ---------- login ---------- */
   /* ---------- login / first touchpoint (animated) ----------
-     From the team's sketches: 1 dots appear · 2 dots get connected · 3 the logo appears · 4 logo moves up, join form. */
+     Storyboard "Login v4" in the team's Figma — see the stages below. */
   const LOGO_A = ['M14.7917 31.4889C11.9476 31.4889 9.40763 30.8432 7.17376 29.5499C4.93803 28.2584 3.18378 26.4837 1.91101 24.2311C0.638247 21.9786 0 19.4107 0 16.5292C0 13.8344 0.627051 11.3411 1.88302 9.04941C3.13899 6.75955 4.85591 4.92318 7.03566 3.53658C9.21355 2.15184 11.7068 1.45947 14.5155 1.45947C17.5444 1.45947 20.0918 2.10519 22.1614 3.39848C24.2292 4.69177 25.7987 6.41803 26.8699 8.57912C27.9411 10.7402 28.4767 13.1308 28.4767 15.7529C28.4767 16.3445 28.389 16.4173 28.389 16.8428C28.389 17.1488 28.1986 17.4399 27.9467 17.6994C27.3215 18.3432 26.4351 18.6661 25.5374 18.6474L5.40458 18.192C4.65249 18.192 4.04224 17.5818 4.04224 16.8297V14.4036C4.04224 13.6515 4.65249 13.0413 5.40458 13.0413H19.7633C20.7487 13.0413 21.3907 12.0036 20.9502 11.1228L20.9409 11.1023C20.6087 10.436 20.1459 9.82762 19.5562 9.27335C18.9646 8.71909 18.2535 8.26746 17.4231 7.91661C16.5926 7.56576 15.6408 7.39033 14.5696 7.39033C13.1662 7.39033 11.8822 7.75984 10.7196 8.49887C9.55693 9.23789 8.64248 10.2643 7.97811 11.5744C7.31373 12.8864 6.97968 14.4465 6.97968 16.2549C6.97968 18.0633 7.33053 19.7373 8.03223 21.0474C8.73393 22.3593 9.68383 23.3559 10.8857 24.0389C12.0857 24.722 13.4237 25.0635 14.9018 25.0635C16.6374 25.0635 18.0968 24.6846 19.2781 23.9269C20.1366 23.3783 20.8588 22.7251 21.4448 21.9711C21.8367 21.4654 22.5291 21.3105 23.102 21.5923L26.5508 23.2831C27.3047 23.6526 27.5492 24.6156 27.0677 25.3023C25.8752 27.0025 24.4233 28.391 22.7138 29.4678C20.5714 30.8152 17.9307 31.4907 14.7917 31.4907V31.4889Z', 'M31.6904 29.2398V3.70795C31.6904 2.95586 32.3007 2.34561 33.0528 2.34561H37.1417C37.8938 2.34561 38.504 2.95586 38.504 3.70795V6.11351H38.9482C39.4278 5.22706 40.0642 4.44324 40.8592 3.75834C41.6542 3.07343 42.5854 2.53036 43.6567 2.12353C44.7279 1.71856 45.8737 1.51514 47.0905 1.51514C47.8295 1.51514 48.4939 1.57112 49.0855 1.68123C49.2516 1.71296 49.4121 1.74655 49.567 1.78387C50.1903 1.93317 50.6363 2.47624 50.6363 3.11636V7.49079C50.6363 8.4015 49.7573 9.04722 48.8839 8.78781C48.7011 8.73369 48.5182 8.68144 48.3371 8.63291C47.5795 8.43136 46.777 8.32872 45.9279 8.32872C44.4871 8.32872 43.2405 8.6889 42.1879 9.40926C41.1354 10.1296 40.3329 11.1075 39.7786 12.3467C39.2244 13.5859 38.9482 14.9781 38.9482 16.5289V29.2398C38.9482 29.9918 38.3379 30.6021 37.5858 30.6021H33.0528C32.3007 30.6021 31.6904 29.9918 31.6904 29.2398Z', 'M78.1226 14.0337H74.1643C73.4778 14.0337 72.9214 14.5902 72.9214 15.2766V29.5457C72.9214 30.2322 73.4778 30.7887 74.1643 30.7887H78.1226C78.809 30.7887 79.3655 30.2322 79.3655 29.5457V15.2766C79.3655 14.5902 78.809 14.0337 78.1226 14.0337Z', 'M64.2855 0.260102C67.1292 0.210465 69.68 0.811752 71.9361 2.06586C74.194 3.31807 75.979 5.06197 77.2909 7.29194C78.6028 9.52192 79.2857 12.0783 79.336 14.9593C79.3831 17.6537 78.7996 20.1576 77.5838 22.4709C76.368 24.7823 74.6834 26.6483 72.5282 28.0728C70.3748 29.4953 67.894 30.2311 65.0858 30.2801C62.0573 30.333 59.4991 29.7318 57.4072 28.4748C55.3171 27.2178 53.7177 25.5192 52.609 23.3772C51.5002 21.2351 50.923 18.8542 50.8772 16.2325C50.8669 15.641 50.9533 15.5667 50.9459 15.1413C50.9405 14.8353 51.1258 14.5409 51.3732 14.2771C51.987 13.6225 52.8677 13.2842 53.7655 13.2872L73.9032 13.3911C74.6552 13.378 75.276 13.9775 75.2892 14.7295L75.3315 17.1552C75.3446 17.9071 74.7451 18.528 73.9931 18.5411L59.6366 18.7917C58.6514 18.8089 58.0276 19.8575 58.4833 20.7306L58.493 20.7509C58.8368 21.4113 59.3102 22.0115 59.9095 22.5554C60.5107 23.0993 61.2295 23.5384 62.0659 23.8747C62.9024 24.211 63.8571 24.3698 64.9281 24.3511C66.3313 24.3266 67.6086 23.9347 68.7582 23.1755C69.9078 22.4163 70.8042 21.3741 71.4456 20.0526C72.087 18.7293 72.3938 17.1635 72.3622 15.3554C72.3306 13.5473 71.9506 11.8797 71.2262 10.5821C70.5017 9.28256 69.5345 8.30272 68.3209 7.64076C67.1092 6.97877 65.7654 6.66066 64.2876 6.68645C62.5522 6.71674 61.0997 7.121 59.9318 7.89919C59.083 8.46275 58.3723 9.12844 57.7995 9.89251C57.4165 10.405 56.727 10.572 56.1492 10.3002L52.6714 8.66986C51.9111 8.31356 51.6499 7.35501 52.1193 6.65994C53.282 4.93925 54.7095 3.52566 56.3999 2.41917C58.5184 1.03458 61.147 0.313017 64.2855 0.258234L64.2855 0.260102Z'];
   const LOGO_B = 'M23.7523 34.9833C23.1761 34.9833 22.7154 35.4736 22.7604 36.0484C23.3635 43.596 30.3277 49.5698 38.801 49.5698C47.2742 49.5698 54.2385 43.596 54.8415 36.0484C54.888 35.4736 54.4259 34.9833 53.8496 34.9833L50.1061 34.9833C49.5975 34.9833 49.1833 35.3693 49.1241 35.8737C48.6 40.3527 44.1704 43.8623 38.7996 43.8623C33.4288 43.8623 28.9991 40.3527 28.475 35.8737C28.4158 35.3693 28.0016 34.9833 27.493 34.9833L23.7495 34.9833L23.7523 34.9833Z';
   const logoSVG = (cls = '') => `<svg class="era-logo ${cls}" viewBox="0 0 80 50" role="img" aria-label="era">${LOGO_A.map((d) => `<path class="la" d="${d}"/>`).join('')}<path class="lb" d="${LOGO_B}"/></svg>`;
 
-  // Login v4 from the Figma board: grey background, white bubbles pop in → come together (small lines)
-  // → the logo appears in their middle → bubbles frame the login. Coordinates are the Figma frame (1728×1117).
+  // Login v4 storyboard (Figma board, frame 1728×1117):
+  //   0 start, empty grey · 1 three bubbles pop in · 2 lines join them · 3 bubbles and lines fade into the background
+  //   · 4 the era logo comes forward out of the background · 5 the logo moves up and the login scrolls in under it.
   const FW = 1728, FH = 1117;
-  // name: r, and centre per stage [1 pop in, 2 together, 3 logo, 4 login]; null = not shown in that stage
-  const BUBS = {
-    A: [70, [469, 431], [690, 520], [600, 470], [300, 380]],
-    B: [70, [1208, 416], [1040, 510], [1120, 470], [1420, 360]],
-    C: [50, [276, 891], [640, 790], [580, 820], [250, 860]],
-    D: [90, [864, 667], [864, 667], null, null],
-    E: [75, [1294, 1047], [1080, 830], [1150, 860], [1440, 900]],
-    H: [36, [1520, 760], [1240, 690], [1300, 690], [1600, 620]],
-    I: [24, [150, 560], [500, 650], [440, 640], [130, 580]],
-    F: [26, null, null, null, [1560, 180]],
-    G: [22, null, null, null, [560, 150]],
-    J: [18, null, null, null, [1100, 1020]],
-    K: [30, null, null, null, [150, 200]],
-  };
-  const LINKS = { 2: ['A-D', 'B-D', 'C-D', 'E-D', 'A-C', 'B-E', 'C-I', 'B-H'], 3: ['A-C', 'B-E', 'C-I', 'B-H'], 4: ['A-C', 'B-E', 'A-K', 'B-F', 'C-I', 'E-J', 'B-H', 'A-G'] };
-  const LINK_OP = { 2: 1, 3: 0.8, 4: 0.6 };
-  const BRAND = { 0: [864, 667, 130, 0], 1: [864, 667, 130, 0], 2: [864, 667, 130, 0], 3: [864, 640, 300, 1], 4: [864, 396, 150, 1] };
+  const BUBS = [[467, 530, 68], [864, 666, 90], [1313, 429, 70]];   // x, y, r in the frame
+  const LINKS = [[0, 1], [1, 2]];                                     // left → middle → right, hanging like a string
+  const BRAND = { 4: [864, 604, 300], 5: [864, 378, 150] };           // x, y, width of the logo
+  const JOIN_TOP = 455;                                               // top of the login form in the frame
+  const STEPS = [[400, 1], [1700, 2], [3100, 3], [3900, 4], [5500, 5]];  // ms → stage
   let introTimers = [], introStage = 0;
 
   function login() {
     return `
-    <section class="intro" id="intro" aria-label="Welcome to era">
+    <section class="intro" id="intro" aria-label="Welcome to era" data-stage="0">
       <svg class="intro-map" id="introMap" aria-hidden="true"></svg>
-      <header class="intro-top">
-        <span class="intro-logo">${logoSVG()}</span>
-        <nav class="intro-nav" aria-label="About era">
-          <a href="#/login" data-skip>How we work</a><a href="#/login" data-skip>Our services</a><a href="#/login" data-skip>Help desk</a>
-          <span class="intro-ts" aria-hidden="true"><i>−</i> Aa textsize <i>+</i></span>
-          <button class="intro-join" type="button" data-skip>Join now</button>
-        </nav>
-      </header>
       <div class="brand" id="brand" aria-hidden="true">${logoSVG()}</div>
       <div class="join" id="join">
         <h1 class="sr-only">Welcome to era</h1>
@@ -564,71 +545,54 @@
 
   // frame coordinates → screen pixels (the frame is scaled to cover the window, like CSS "cover")
   function introFit() { const w = window.innerWidth, h = window.innerHeight, s = Math.max(w / FW, h / FH); return { s, ox: (w - FW * s) / 2, oy: (h - FH * s) / 2 }; }
-  function drawIntroMap() {
-    const svgEl = $('#introMap'); if (!svgEl) return;
-    svgEl.setAttribute('viewBox', `0 0 ${FW} ${FH}`);
-    svgEl.setAttribute('preserveAspectRatio', 'xMidYMid slice');
-    svgEl.innerHTML = `<g id="introLinks" class="links"></g>` + Object.entries(BUBS).map(([k, [r]]) => {
-      const s = r * 0.42, y = r * 0.1;
-      return `<g class="bub" id="bub-${k}"><circle r="${r}"/>${r >= 50 ? `<path d="M${-s} ${y} A${s} ${s} 0 0 0 ${s} ${y}" stroke-width="${r * 0.15}"/>` : ''}</g>`;
-    }).join('');
-    setIntroStage(introStage, true);
-  }
   // on narrow (portrait) screens the wide frame is cropped at the sides, so pull the bubbles inward
   const squeeze = () => Math.min(1, (FH * window.innerWidth / window.innerHeight) / FW * 0.94);
-  const bubScale = () => Math.max(0.45, Math.min(1, squeeze() * 1.6));
-  const bubPos = (k, st) => { const b = BUBS[k], p = st === 0 ? (b[1] || b[4]) : b[st]; return p ? [864 + (p[0] - 864) * squeeze(), p[1]] : p; };
-  function setIntroStage(st, instant) {
+  function drawIntroMap() {
+    const svgEl = $('#introMap'); if (!svgEl) return;
+    const q = squeeze(), k = Math.max(0.55, Math.min(1, q * 1.6));
+    const P = BUBS.map(([x, y, r]) => [FW / 2 + (x - FW / 2) * q, y, r * k]);
+    const links = LINKS.map(([a, b]) => {
+      const [x1, y1, r1] = P[a], [x2, y2, r2] = P[b], d = Math.hypot(x2 - x1, y2 - y1);
+      const cx = (x1 + x2) / 2, cy = Math.max(y1, y2) + d * 0.16;             // the string sags below both bubbles
+      const edge = (x, y, r) => { const dx = cx - x, dy = cy - y, l = Math.hypot(dx, dy); return [x + dx / l * (r + 6), y + dy / l * (r + 6)]; };
+      const [sx, sy] = edge(x1, y1, r1), [ex, ey] = edge(x2, y2, r2);
+      return `<path d="M${sx.toFixed(1)} ${sy.toFixed(1)} Q ${cx.toFixed(1)} ${cy.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}" pathLength="1"/>`;
+    }).join('');
+    svgEl.setAttribute('viewBox', `0 0 ${FW} ${FH}`);
+    svgEl.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+    svgEl.innerHTML = `<g class="links">${links}</g>` + P.map(([x, y, r], i) => {
+      const s = r * 0.36, sy = r * 0.08;
+      return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})"><g class="bub" style="--i:${i}"><circle r="${r.toFixed(1)}"/>
+        <path d="M${-s} ${sy} A${s} ${s} 0 0 0 ${s} ${sy}" stroke-width="${(r * 0.1).toFixed(1)}"/></g></g>`;
+    }).join('');
+    placeIntro();
+  }
+  // the logo and the form are HTML, placed in frame coordinates
+  function placeIntro() {
+    const f = introFit(), [bx, by, bw] = BRAND[introStage >= 5 ? 5 : 4];
+    const brand = $('#brand'), join = $('#join');
+    if (brand) Object.assign(brand.style, { width: bw * f.s + 'px', left: f.ox + bx * f.s + 'px', top: f.oy + by * f.s + 'px' });
+    if (join) join.style.top = f.oy + JOIN_TOP * f.s + 'px';
+  }
+  function setIntroStage(st) {
     introStage = st;
     const el = $('#intro'); if (!el) return;
     el.dataset.stage = st;
-    for (const [k, b] of Object.entries(BUBS)) {
-      const g = $('#bub-' + k); if (!g) continue;
-      const p = bubPos(k, st), last = p || bubPos(k, Math.max(1, st - 1)) || b[4] || [FW / 2, FH / 2];
-      const show = st > 0 && !!p;
-      g.style.transition = instant ? 'none' : '';
-      g.style.transform = `translate(${last[0]}px, ${last[1]}px) scale(${(show ? 1 : 0.2) * bubScale()})`;
-      g.style.opacity = show ? (st === 4 ? (/[ABCE]/.test(k) ? 0.85 : 0.7) : 1) : 0;
-    }
-    // small lines: fade out, redraw at the new positions once the bubbles have moved, fade in
-    const lg = $('#introLinks');
-    if (lg) {
-      lg.classList.remove('on');
-      const draw = () => {
-        const list = LINKS[st] || [];
-        lg.innerHTML = list.map((pair) => {
-          const [a, b] = pair.split('-'), p = bubPos(a, st), q = bubPos(b, st); if (!p || !q) return '';
-          const ra = BUBS[a][0] * bubScale(), rb = BUBS[b][0] * bubScale(), dx = q[0] - p[0], dy = q[1] - p[1], d = Math.hypot(dx, dy), ux = dx / d, uy = dy / d, gap = 10;
-          const sx = p[0] + ux * (ra + gap), sy = p[1] + uy * (ra + gap), ex = q[0] - ux * (rb + gap), ey = q[1] - uy * (rb + gap);
-          const bend = 0.08 * d * ((a.charCodeAt(0) + b.charCodeAt(0)) % 2 ? 1 : -1), mx = (sx + ex) / 2 - uy * bend, my = (sy + ey) / 2 + ux * bend;
-          return `<path d="M${sx.toFixed(1)} ${sy.toFixed(1)} Q ${mx.toFixed(1)} ${my.toFixed(1)} ${ex.toFixed(1)} ${ey.toFixed(1)}" pathLength="1"/>`;
-        }).join('');
-        lg.style.opacity = LINK_OP[st] || 0;
-        requestAnimationFrame(() => lg.classList.add('on'));
-      };
-      if (instant) { draw(); lg.classList.add('on'); } else introTimers.push(setTimeout(draw, 900));
-    }
-    // logo
-    const brand = $('#brand'), [bx, by, bw, bo] = BRAND[st], f = introFit();
-    if (brand) { brand.style.transition = instant ? 'none' : ''; brand.style.width = bw * f.s + 'px'; brand.style.left = (f.ox + bx * f.s) + 'px'; brand.style.top = (f.oy + by * f.s) + 'px'; brand.style.opacity = bo; }
-    const join = $('#join');
-    if (join) { join.style.top = (f.oy + 466 * f.s) + 'px'; }
-    el.classList.toggle('show-top', st === 1 || st === 2);
-    el.classList.toggle('show-join', st === 4);
+    placeIntro();
   }
   function stopIntro() { introTimers.forEach(clearTimeout); introTimers = []; }
   function playIntro(skip) {
     stopIntro();
-    if (!$('#intro')) return;
-    introStage = 0; drawIntroMap();
+    const el = $('#intro'); if (!el) return;
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (skip || reduce) { setIntroStage(4, true); return; }
-    const at = (ms, st) => introTimers.push(setTimeout(() => setIntroStage(st), ms));
-    at(150, 1);   // bubbles pop in
-    at(1500, 2);  // they come together, small lines appear
-    at(3300, 3);  // the logo appears in their middle
-    at(4900, 4);  // bubbles frame the login
-    introTimers.push(setTimeout(() => $('#code')?.focus({ preventScroll: true }), 6000));
+    el.classList.add('instant');                  // jump without animating, then turn transitions back on
+    setIntroStage(skip || reduce ? 5 : 0); drawIntroMap();
+    void el.offsetWidth; el.classList.remove('instant');
+    // a click during the animation skips straight to the login
+    el.onclick = (e) => { if (introStage < 5 && !e.target.closest('[data-replay]')) playIntro(true); };
+    if (skip || reduce) { $('#code')?.focus({ preventScroll: true }); return; }
+    STEPS.forEach(([ms, st]) => introTimers.push(setTimeout(() => setIntroStage(st), ms)));
+    introTimers.push(setTimeout(() => $('#code')?.focus({ preventScroll: true }), STEPS[STEPS.length - 1][0] + 1100));
   }
 
   /* ---------- routing ---------- */
