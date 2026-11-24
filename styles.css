@@ -715,7 +715,7 @@ svg.ms, svg.ms path { fill: currentColor !important; stroke: none !important; }
 .fam-map .bot { position: relative; display: block; width: 73px; height: 73px; border-radius: 15px; background: #fff; box-shadow: none; }
 .fam-map .bot::after { display: none; }
 .fam-map .bot img { display: block; width: 100%; height: 100%; }
-.fam-map .ask form { flex: none; width: 245px; height: 64px; padding: 10px 20px; border-radius: 99px; background: #fff; box-shadow: none; display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); }
+.fam-map .ask form { flex: none; width: 245px; height: 64px; padding: 0 9.5px 0 20px; border-radius: 99px; background: #fff; box-shadow: none; display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); }
 .fam-map .ask form:focus-within { box-shadow: 0 0 0 2px var(--blue); }
 .fam-map .ask input { font-size: var(--t-ui); min-height: 0; color: var(--charcoal); }
 .fam-map .ask input::placeholder { color: rgba(47, 47, 47, .7); }
