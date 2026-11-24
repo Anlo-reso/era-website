@@ -1,5 +1,5 @@
 /* era website — clickable prototype with made-up example data.
-   Routes: #/login · #/family · #/family/<id> · #/steps · #/services[/<id>] · #/help */
+   Routes: #/login · #/family[/<person> | /svc-<service>] · #/steps · #/services[/<id> | /search] · #/help · #/privacy */
 (() => {
   'use strict';
   const $ = (s, el = document) => el.querySelector(s);
@@ -12,18 +12,16 @@
   // Material Symbols Outlined (weight 400, fill 0, 24px) — fonts.google.com/icons
   const I = {
     arrow: '<path d="M647-440H160v-80h487L423-744l57-56 320 320-320 320-57-56 224-224Z"/>',  // arrow_forward
-    back: '<path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z"/>',  // arrow_back
     food: '<path d="M280-80v-366q-51-14-85.5-56T160-600v-280h80v280h40v-280h80v280h40v-280h80v280q0 56-34.5 98T360-446v366h-80Zm400 0v-320H560v-280q0-83 58.5-141.5T760-880v800h-80Z"/>',  // restaurant
     car: '<path d="M240-200v40q0 17-11.5 28.5T200-120h-40q-17 0-28.5-11.5T120-160v-320l84-240q6-18 21.5-29t34.5-11h440q19 0 34.5 11t21.5 29l84 240v320q0 17-11.5 28.5T800-120h-40q-17 0-28.5-11.5T720-160v-40H240Zm-8-360h496l-42-120H274l-42 120Zm-32 80v200-200Zm100 160q25 0 42.5-17.5T360-380q0-25-17.5-42.5T300-440q-25 0-42.5 17.5T240-380q0 25 17.5 42.5T300-320Zm360 0q25 0 42.5-17.5T720-380q0-25-17.5-42.5T660-440q-25 0-42.5 17.5T600-380q0 25 17.5 42.5T660-320Zm-460 40h560v-200H200v200Z"/>',  // directions_car
     hand: '<path d="M480-480v-400q0-17 11.5-28.5T520-920q17 0 28.5 11.5T560-880v400h-80Zm-160 0v-360q0-17 11.5-28.5T360-880q17 0 28.5 11.5T400-840v360h-80ZM500-40q-142 0-241-99t-99-241v-380q0-17 11.5-28.5T200-800q17 0 28.5 11.5T240-760v380q0 109 75.5 184.5T500-120q109 0 184.5-75.5T760-380v-140q-17 0-28.5 11.5T720-480v160H600q-33 0-56.5 23.5T520-240v40h-80v-40q0-66 47-113t113-47h40v-400q0-17 11.5-28.5T680-840q17 0 28.5 11.5T720-800v207q10-3 19.5-5t20.5-2h80v220q0 142-99 241T500-40Zm40-320Z"/>',  // front_hand
     home: '<path d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z"/>',  // home
-    msg: '<path d="M240-400h320v-80H240v80Zm0-120h480v-80H240v80Zm0-120h480v-80H240v80ZM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z"/>',  // chat
     phone: '<path d="M798-120q-125 0-247-54.5T329-329Q229-429 174.5-551T120-798q0-18 12-30t30-12h162q14 0 25 9.5t13 22.5l26 140q2 16-1 27t-11 19l-97 98q20 37 47.5 71.5T387-386q31 31 65 57.5t72 48.5l94-94q9-9 23.5-13.5T670-390l138 28q14 4 23 14.5t9 23.5v162q0 18-12 30t-30 12ZM241-600l66-66-17-94h-89q5 41 14 81t26 79Zm358 358q39 17 79.5 27t81.5 13v-88l-94-19-67 67ZM241-600Zm358 358Z"/>',  // call
     check: '<path d="M382-240 154-468l57-57 171 171 367-367 57 57-424 424Z"/>',  // check
     search: '<path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z"/>',  // search
-    pin: '<path d="M536.5-503.5Q560-527 560-560t-23.5-56.5Q513-640 480-640t-56.5 23.5Q400-593 400-560t23.5 56.5Q447-480 480-480t56.5-23.5ZM480-186q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z"/>',  // location_on
     cross: '<path d="M120-120v-80l80-240-80-240v-80h508l58-160 94 34-46 126h106v80l-80 240 80 240v80H120Zm320-160h80v-120h120v-80H520v-120h-80v120H320v80h120v120Zm-236 80h552l-80-240 80-240H204l80 240-80 240Zm276-240Z"/>',  // local_pharmacy
     add: '<path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>',  // add
+    question: '<path d="M424-320q0-81 14.5-116.5T500-514q41-36 62.5-62.5T584-637q0-41-27.5-68T480-732q-51 0-77.5 31T365-638l-103-44q21-64 77-111t141-47q105 0 161.5 58.5T698-641q0 50-21.5 85.5T609-475q-49 47-59.5 71.5T539-320H424Zm56 240q-33 0-56.5-23.5T400-160q0-33 23.5-56.5T480-240q33 0 56.5 23.5T560-160q0 33-23.5 56.5T480-80Z"/>',  // question_mark
   };
   const icon = (n) => `<svg class="ms" viewBox="0 -960 960 960" aria-hidden="true">${I[n]}</svg>`;
 
@@ -35,32 +33,12 @@
     sofia:  { name: 'Sofia',  role: 'Granddaughter', full: 'Sofia Rossi',   born: '30.01.2005', photo: 'assets/people/sofia.jpg' },
     lucia:  { name: 'Lucia',  role: 'Neighbour',     full: 'Lucia Conti',   born: '',           photo: null },
   };
-  const DETAILS = {
-    rosa: {
-      relation: 'Mum', sub: 'Via Pignolo 12, Bergamo · 50 min from you',
-      appts: [['Thu 26 Nov', 'Dr. Ferri (GP) — check-up, 10:00'], ['Tue 8 Dec', 'Cardiologist — heart check, 9:30']],
-      info: ['Irregular heartbeat · 4 medicines a day', 'Allergic to penicillin', 'Wants to stay at home as long as possible'],
-      actions: [['food', 'Order food', 'food'], ['drive', 'Get driving assistance', 'car']],
-    },
-    giulia: { relation: 'You', sub: 'Lives in Milan · 50 min away', appts: [['Thu 26 Nov', 'Goes with Rosa to Dr. Ferri']], info: ['Looks after Wishes and Health', "Rosa's main contact"], actions: [] },
-    marco: { relation: 'Brother', sub: 'Lives in Bergamo · 10 min away', appts: [['Fri 4 Dec', 'Notary — power of attorney, 15:00']], info: ['Looks after Legal and Money', 'Can drive Rosa on Thursdays'], actions: [['msg', 'Send Marco a message', 'msg'], ['call', 'Call Marco', 'phone']] },
-    sofia: { relation: 'Granddaughter', sub: 'Student in Bergamo', appts: [['Every Wed', 'Visits Nonna · tech help']], info: ['Helps Rosa with the phone and the app'], actions: [['msg', 'Send Sofia a message', 'msg'], ['call', 'Call Sofia', 'phone']] },
-    lucia: { relation: 'Neighbour', sub: 'Lives next door · has a key', appts: [], info: ['Can see the emergency sheet only', 'Checks on Rosa in the evening'], actions: [['call', 'Call Lucia', 'phone']] },
-  };
-  const TOPICS = [['Wishes', 'ready'], ['Health', 'almost'], ['Legal', 'ready'], ['Living at home', 'todo'], ['Money & funding', 'todo']];
-  const CHIP = { ready: ['chip-ready', 'Ready'], almost: ['chip-almost', 'Almost ready'], todo: ['chip-todo', 'Not started'] };
   const SERVICE_DONE = {
     food: { soon: 'tomorrow 12:00', text: 'Lunch delivery — Pranzo a Casa', when: 'Every day at 12:00 · starts tomorrow', toast: 'Lunch is ordered for Rosa. It arrives tomorrow at 12:00.' },
     drive: { soon: 'Thu 9:30', text: 'Driving service — Bus Amico', when: 'Thu 26 Nov · pick-up 9:30 to Dr. Ferri', toast: 'A driver picks Rosa up on Thursday at 9:30.' },
     assist: { soon: 'Mon 9:00', text: 'Daily care assistant — Casa Serena', when: 'First visit Mon 30 Nov · 9:00', toast: 'Casa Serena will call you to plan the first visit.' },
     funding: { soon: 'in review', text: 'Home adjustment funding', when: 'Application started · a care advisor checks it', toast: 'Your funding application is started. A care advisor will call you.' },
   };
-  const SERVICES = [
-    { id: 'food', icon: 'food', name: 'Food delivery', who: 'Pranzo a Casa', what: 'A warm lunch at the door, every day.', dist: '600 m from Rosa', cost: 'First week free' },
-    { id: 'drive', icon: 'car', name: 'Driving service', who: 'Bus Amico', what: 'Volunteer drivers to the doctor and the hospital.', dist: '1.1 km from Rosa', cost: 'Free' },
-    { id: 'assist', icon: 'hand', name: 'Daily care assistant', who: 'Casa Serena', what: 'Help with shopping, cleaning and taking medicines.', dist: '900 m from Rosa', cost: 'Partly funded' },
-    { id: 'funding', icon: 'home', name: 'Funding for home adjustments', who: 'Social services Bergamo', what: 'Money and advice for grab rails, showers and ramps.', dist: '1.6 km from Rosa', cost: 'Free advice' },
-  ];
 
   let state = store.get('state', { active: [], checklist: [] });
   const save = () => store.set('state', state);
@@ -95,6 +73,10 @@
   // the point a share t along a line
   function alongLink(a, b, t) { const { p, c, q } = linkGeom(a, b), m = 1 - t; return { x: m * m * p.x + 2 * m * t * c.x + t * t * q.x, y: m * m * p.y + 2 * m * t * c.y + t * t * q.y }; }
   // services and lines that belong to the person you picked
+  const notYet = (a, b) => {
+    if (a === 'giulia' || b === 'giulia') return !isConnected(a === 'giulia' ? b : a);
+    return [a, b].some((x) => x !== 'rosa' && !hasLink('giulia', x) && !isConnected(x));
+  };
   const svcOf = (id) => Object.keys(MAP_SVC).filter((k) => MAP_SVC[k].people.includes(id));
   const lineHl = (a, b) => (selected || selSvc) && (selSvc ? [selSvc] : svcOf(selected)).some((k) => { const [x, y] = MAP_SVC[k].on; return (x === a && y === b) || (x === b && y === a); });
   const hasLink = (a, b) => FAM_LINKS.some(([x, y]) => (x === a && y === b) || (x === b && y === a));
@@ -115,9 +97,17 @@
     const z = mapZ(), u = (px) => px / z;           // text sizes in screen pixels, whatever the map's scale
     const ns = u(small ? 13 : 16), ls = u(12.5), ss = u(11.5);
     let s = '';
-    s += `<g class="links">${FAM_LINKS.map(([a, b], i) => `<path class="link ${lineHl(a, b) ? 'hl' : ''}" d="${link(a, b)}" pathLength="1" style="--i:${i}"/>`).join('')}</g>`;
-    // the route to the person you picked draws itself, and a dashed flow keeps travelling along it
-    if (selected) { const d = routeTo(selected); if (d.trim()) s += `<path class="route" d="${d}" pathLength="1"/><path class="route-flow" d="${d}"/>`; }
+    // lines to people you are not connected with yet are still and dotted, with a question mark half-way
+    const k2q = small ? 1.6 : 1 / z, dots = `stroke-dasharray:0 ${(8 * k2q).toFixed(1)};stroke-width:${(3.5 * k2q).toFixed(1)}`;
+    s += `<g class="links">${FAM_LINKS.map(([a, b], i) => { const nc = notYet(a, b);
+      return `<path class="link ${nc ? 'pending' : ''} ${lineHl(a, b) ? 'hl' : ''}" d="${link(a, b)}" ${nc ? `style="${dots}"` : `pathLength="1" style="--i:${i}"`}/>`; }).join('')}</g>`;
+    // the route to the person you picked: drawn solid, or dotted while you are not connected yet
+    if (selected) {
+      const d = routeTo(selected), nc = !isConnected(selected);
+      if (d.trim()) s += nc ? `<path class="route pending" d="${d}" style="${dots}"/>` : `<path class="route" d="${d}" pathLength="1"/>`;
+    }
+    s += FAM_LINKS.filter(([a, b]) => notYet(a, b)).map(([a, b]) => { const m = alongLink(a, b, 0.5), qr = 15 * k2q, qi = 18 * k2q;
+      return `<g class="route-q"><title>Not connected yet</title><circle cx="${m.x}" cy="${m.y}" r="${qr}"/><svg x="${m.x - qi / 2}" y="${m.y - qi / 2}" width="${qi}" height="${qi}" viewBox="0 -960 960 960" class="ms">${I.question}</svg></g>`; }).join('');
     // services on the lines: blue when active (opted in), white when not; the picked person's ones light up
     const mine = selSvc ? [selSvc] : selected ? svcOf(selected) : [];
     let tags = '';   // names, drawn last so nothing covers them; shown on hover or keyboard focus
@@ -138,7 +128,7 @@
       const p = MAPP[id], who = PEOPLE[id], you = id === 'giulia';
       const mf = prepScore(id), mR = p.r + 6 + u(7), mw = u(5);
       const ly = p.y + p.r + (you ? 22 : 14) + ns + u(12);
-      const pinW = textW(p.where, ls) + ls * 2.9, pinH = ls * 2, py = ly + ls * 0.8, pc = py + pinH / 2, ic = ls * 1.25;
+      const pinW = textW(p.where, ls) + ls * 2.9, pinH = ls * 2, py = p.y - p.r - 6 - u(10) - pinH, pc = py + pinH / 2, ic = ls * 1.25;   // above the face
       const px = p.x - pinW / 2 + ls * 0.7;
       return `
       <g class="person ${selected === id ? 'sel' : ''} ${you ? 'is-you' : ''}" data-person="${id}" role="button" tabindex="0" style="--i:${PEOPLE_ORDER.indexOf(id)}" aria-pressed="${selected === id}" aria-label="${you ? 'You' : `${esc(who.name)}, ${esc(who.role)}`}, ${esc(p.where)}, ${id === 'rosa' ? 'family' : ''} preparedness ${pct(mf)}. Show details">
@@ -609,7 +599,6 @@
     </div>`;
   }
 
-  /* ---------- login ---------- */
   /* ---------- login / first touchpoint (animated) ----------
      Storyboard "Login v4" in the team's Figma — see the stages below. */
   const LOGO_A = ['M14.7917 31.4889C11.9476 31.4889 9.40763 30.8432 7.17376 29.5499C4.93803 28.2584 3.18378 26.4837 1.91101 24.2311C0.638247 21.9786 0 19.4107 0 16.5292C0 13.8344 0.627051 11.3411 1.88302 9.04941C3.13899 6.75955 4.85591 4.92318 7.03566 3.53658C9.21355 2.15184 11.7068 1.45947 14.5155 1.45947C17.5444 1.45947 20.0918 2.10519 22.1614 3.39848C24.2292 4.69177 25.7987 6.41803 26.8699 8.57912C27.9411 10.7402 28.4767 13.1308 28.4767 15.7529C28.4767 16.3445 28.389 16.4173 28.389 16.8428C28.389 17.1488 28.1986 17.4399 27.9467 17.6994C27.3215 18.3432 26.4351 18.6661 25.5374 18.6474L5.40458 18.192C4.65249 18.192 4.04224 17.5818 4.04224 16.8297V14.4036C4.04224 13.6515 4.65249 13.0413 5.40458 13.0413H19.7633C20.7487 13.0413 21.3907 12.0036 20.9502 11.1228L20.9409 11.1023C20.6087 10.436 20.1459 9.82762 19.5562 9.27335C18.9646 8.71909 18.2535 8.26746 17.4231 7.91661C16.5926 7.56576 15.6408 7.39033 14.5696 7.39033C13.1662 7.39033 11.8822 7.75984 10.7196 8.49887C9.55693 9.23789 8.64248 10.2643 7.97811 11.5744C7.31373 12.8864 6.97968 14.4465 6.97968 16.2549C6.97968 18.0633 7.33053 19.7373 8.03223 21.0474C8.73393 22.3593 9.68383 23.3559 10.8857 24.0389C12.0857 24.722 13.4237 25.0635 14.9018 25.0635C16.6374 25.0635 18.0968 24.6846 19.2781 23.9269C20.1366 23.3783 20.8588 22.7251 21.4448 21.9711C21.8367 21.4654 22.5291 21.3105 23.102 21.5923L26.5508 23.2831C27.3047 23.6526 27.5492 24.6156 27.0677 25.3023C25.8752 27.0025 24.4233 28.391 22.7138 29.4678C20.5714 30.8152 17.9307 31.4907 14.7917 31.4907V31.4889Z', 'M31.6904 29.2398V3.70795C31.6904 2.95586 32.3007 2.34561 33.0528 2.34561H37.1417C37.8938 2.34561 38.504 2.95586 38.504 3.70795V6.11351H38.9482C39.4278 5.22706 40.0642 4.44324 40.8592 3.75834C41.6542 3.07343 42.5854 2.53036 43.6567 2.12353C44.7279 1.71856 45.8737 1.51514 47.0905 1.51514C47.8295 1.51514 48.4939 1.57112 49.0855 1.68123C49.2516 1.71296 49.4121 1.74655 49.567 1.78387C50.1903 1.93317 50.6363 2.47624 50.6363 3.11636V7.49079C50.6363 8.4015 49.7573 9.04722 48.8839 8.78781C48.7011 8.73369 48.5182 8.68144 48.3371 8.63291C47.5795 8.43136 46.777 8.32872 45.9279 8.32872C44.4871 8.32872 43.2405 8.6889 42.1879 9.40926C41.1354 10.1296 40.3329 11.1075 39.7786 12.3467C39.2244 13.5859 38.9482 14.9781 38.9482 16.5289V29.2398C38.9482 29.9918 38.3379 30.6021 37.5858 30.6021H33.0528C32.3007 30.6021 31.6904 29.9918 31.6904 29.2398Z', 'M78.1226 14.0337H74.1643C73.4778 14.0337 72.9214 14.5902 72.9214 15.2766V29.5457C72.9214 30.2322 73.4778 30.7887 74.1643 30.7887H78.1226C78.809 30.7887 79.3655 30.2322 79.3655 29.5457V15.2766C79.3655 14.5902 78.809 14.0337 78.1226 14.0337Z', 'M64.2855 0.260102C67.1292 0.210465 69.68 0.811752 71.9361 2.06586C74.194 3.31807 75.979 5.06197 77.2909 7.29194C78.6028 9.52192 79.2857 12.0783 79.336 14.9593C79.3831 17.6537 78.7996 20.1576 77.5838 22.4709C76.368 24.7823 74.6834 26.6483 72.5282 28.0728C70.3748 29.4953 67.894 30.2311 65.0858 30.2801C62.0573 30.333 59.4991 29.7318 57.4072 28.4748C55.3171 27.2178 53.7177 25.5192 52.609 23.3772C51.5002 21.2351 50.923 18.8542 50.8772 16.2325C50.8669 15.641 50.9533 15.5667 50.9459 15.1413C50.9405 14.8353 51.1258 14.5409 51.3732 14.2771C51.987 13.6225 52.8677 13.2842 53.7655 13.2872L73.9032 13.3911C74.6552 13.378 75.276 13.9775 75.2892 14.7295L75.3315 17.1552C75.3446 17.9071 74.7451 18.528 73.9931 18.5411L59.6366 18.7917C58.6514 18.8089 58.0276 19.8575 58.4833 20.7306L58.493 20.7509C58.8368 21.4113 59.3102 22.0115 59.9095 22.5554C60.5107 23.0993 61.2295 23.5384 62.0659 23.8747C62.9024 24.211 63.8571 24.3698 64.9281 24.3511C66.3313 24.3266 67.6086 23.9347 68.7582 23.1755C69.9078 22.4163 70.8042 21.3741 71.4456 20.0526C72.087 18.7293 72.3938 17.1635 72.3622 15.3554C72.3306 13.5473 71.9506 11.8797 71.2262 10.5821C70.5017 9.28256 69.5345 8.30272 68.3209 7.64076C67.1092 6.97877 65.7654 6.66066 64.2876 6.68645C62.5522 6.71674 61.0997 7.121 59.9318 7.89919C59.083 8.46275 58.3723 9.12844 57.7995 9.89251C57.4165 10.405 56.727 10.572 56.1492 10.3002L52.6714 8.66986C51.9111 8.31356 51.6499 7.35501 52.1193 6.65994C53.282 4.93925 54.7095 3.52566 56.3999 2.41917C58.5184 1.03458 61.147 0.313017 64.2855 0.258234L64.2855 0.260102Z'];
@@ -621,7 +610,7 @@
   //   · 4 the era logo comes forward out of the background · 5 the logo moves up and the login scrolls in under it.
   const FW = 1728, FH = 1117;
   const BUBS = [[467, 530, 68], [864, 666, 90], [1313, 429, 70]];   // x, y, r in the frame
-  const LINKS = [[0, 1], [1, 2]];                                     // left → middle → right, hanging like a string
+  const LINKS = [[0, 1], [2, 1]];                                     // from the left and from the right, in to the middle bubble
   const BRAND = { 4: [864, 604, 300], 5: [864, 378, 150] };           // x, y, width of the logo
   const JOIN_TOP = 455;                                               // top of the login form in the frame
   const STEPS = [[400, 1], [1700, 2], [3100, 3], [3900, 4], [5500, 5]];  // ms → stage
@@ -752,7 +741,7 @@
   document.addEventListener('click', (e) => {
     // tapping the empty map closes the person or service card
     if (e.target.closest('#map') && !e.target.closest('.person, .stop') && (selected || selSvc)) { selected = null; selSvc = null; history.replaceState(null, '', '#/family'); refreshFamily(); return; }
-    const t = e.target.closest('[data-person], [data-prepdo], [data-connect], [data-doc], [data-viewdetails], [data-theme], [data-skip], [data-svcfilter], [data-svcsel], [data-chatact], [data-stop], [data-action], [data-q], [data-check], [data-notify], [data-close]');
+    const t = e.target.closest('[data-person], [data-prepdo], [data-connect], [data-doc], [data-viewdetails], [data-skip], [data-svcfilter], [data-svcsel], [data-chatact], [data-stop], [data-action], [data-q], [data-check], [data-notify], [data-close]');
     if (!t) return;
     const d = t.dataset;
     if (d.person) { pick(d.person); return; }
@@ -763,7 +752,6 @@
     if (d.svcfilter) { svcFilter = d.svcfilter; $$('[data-svcfilter]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.svcfilter === svcFilter)); renderServices(); return; }
     if (d.chatact) { if (d.chatact === 'urgent') $('#urgent').showModal(); else toast(d.chatact.replace(/^toast:/, '')); return; }
     if (d.svcsel && !e.target.closest('button, a')) { svcSel = svcSel === d.svcsel ? null : d.svcsel; renderServices(); return; }
-    if (d.theme) { state.theme = d.theme; save(); const el = $('#intro'); el.className = el.className.replace(/theme-\w+/, 'theme-' + d.theme); $$('[data-theme]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.theme === d.theme)); return; }
     if (d.skip !== undefined) { e.preventDefault(); playIntro(true); $('#code')?.focus(); return; }
     if (d.stop) { if ($('#map')) pickSvc(d.stop); else location.hash = '#/services/' + d.stop; return; }
     if (d.action) {
@@ -773,7 +761,6 @@
         toast(s.toast);
         if (location.hash.startsWith('#/family')) refreshFamily(); else render();
       } else if (d.action.startsWith('svc-')) { toast('Request sent. The service will call you within one working day.'); }
-      else toast(d.action === 'call' ? `Connecting you with ${PEOPLE[d.who].name}… (demo)` : `Message to ${PEOPLE[d.who].name} opens here (demo).`);
       return;
     }
     if (d.q) {
