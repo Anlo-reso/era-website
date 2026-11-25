@@ -24,6 +24,7 @@
     cross: '<path d="M120-120v-80l80-240-80-240v-80h508l58-160 94 34-46 126h106v80l-80 240 80 240v80H120Zm320-160h80v-120h120v-80H520v-120h-80v120H320v80h120v120Zm-236 80h552l-80-240 80-240H204l80 240-80 240Zm276-240Z"/>',  // local_pharmacy
     add: '<path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/>',  // add
     question: '<path d="M424-320q0-81 14.5-116.5T500-514q41-36 62.5-62.5T584-637q0-41-27.5-68T480-732q-51 0-77.5 31T365-638l-103-44q21-64 77-111t141-47q105 0 161.5 58.5T698-641q0 50-21.5 85.5T609-475q-49 47-59.5 71.5T539-320H424Zm56 240q-33 0-56.5-23.5T400-160q0-33 23.5-56.5T480-240q33 0 56.5 23.5T560-160q0 33-23.5 56.5T480-80Z"/>',  // question_mark
+    close: '<path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/>',
     remove: '<path d="M200-440v-80h560v80H200Z"/>',  // remove
   };
   const icon = (n) => `<svg class="ms" viewBox="0 -960 960 960" aria-hidden="true">${I[n]}</svg>`;
@@ -625,8 +626,9 @@
       return `<article class="svc2 ${on ? 'is-active' : ''} ${svcSel === s.id ? 'is-sel' : ''}" id="svc-${s.id}" data-svcsel="${s.id}">
         ${s.img ? `<img class="svc2-img" src="${s.img}" alt="">` : '<div class="svc2-img" aria-hidden="true"></div>'}
         <div class="svc2-text"><h3>${s.name}</h3><p class="what">${s.what}</p></div>
-        ${on ? `<p class="active-pill"><i></i>Active for Andrea · ${SERVICE_DONE[s.id].soon}</p>`
-             : `<button class="ask-btn" type="button" data-action="${SERVICE_DONE[s.id] ? s.id : 'svc-' + s.id}" data-who="rosa">Ask for this ${icon('arrow')}</button>`}
+        ${on ? `<div class="active-row"><p class="active-pill"><i></i>Active for Andrea · ${SERVICE_DONE[s.id].soon}</p>
+               <button class="end-btn" type="button" data-endsvc="${s.id}" aria-label="Stop ${esc(s.name)} for Andrea" title="Stop this service">${icon('close')}</button></div>`
+             : `<button class="ask-btn" type="button" data-action="${SERVICE_DONE[s.id] ? s.id : 'svc-' + s.id}" data-who="rosa">Request for Dad (Andrea) ${icon('arrow')}</button>`}
       </article>`;
     }).join('') : '<p class="empty">No service matches. Try another word, or ask era.</p>';
     const vis = new Set(list.map((s) => s.id));
@@ -856,7 +858,7 @@
   document.addEventListener('click', (e) => {
     // tapping the empty map closes the person or service card
     if (e.target.closest('#map') && !e.target.closest('.person, .stop') && (selected || selSvc)) { selected = null; selSvc = null; history.replaceState(null, '', '#/family'); refreshFamily(); return; }
-    const t = e.target.closest('[data-person], [data-zoom], [data-prepdo], [data-connect], [data-doc], [data-viewdetails], [data-skip], [data-svcfilter], [data-svcsel], [data-chatact], [data-stop], [data-action], [data-q], [data-check], [data-notify], [data-close]');
+    const t = e.target.closest('[data-person], [data-zoom], [data-prepdo], [data-connect], [data-doc], [data-viewdetails], [data-skip], [data-svcfilter], [data-svcsel], [data-chatact], [data-stop], [data-endsvc], [data-action], [data-q], [data-check], [data-notify], [data-close]');
     if (!t) return;
     const d = t.dataset;
     if (d.person) { pick(d.person); return; }
@@ -869,6 +871,14 @@
     if (d.svcsel && !e.target.closest('button, a')) { svcSel = svcSel === d.svcsel ? null : d.svcsel; renderServices(); return; }
     if (d.skip !== undefined) { e.preventDefault(); playIntro(true); $('#code')?.focus(); return; }
     if (d.stop) { if ($('#map')) pickSvc(d.stop); else location.hash = '#/services/' + d.stop; return; }
+    // the x next to an active service stops it; "Request for Dad (Andrea)" turns it back on
+    if (d.endsvc) {
+      const s = SERVICE_DONE[d.endsvc], name = SVC.find((x) => x.id === d.endsvc)?.name || 'The service';
+      state.active = state.active.filter((a) => a.text !== s.text); save();
+      toast(`${name} stopped for Andrea. Request it again any time.`);
+      if (location.hash.startsWith('#/family')) refreshFamily(); else renderServices();
+      return;
+    }
     if (d.action) {
       const s = SERVICE_DONE[d.action];
       if (s) {

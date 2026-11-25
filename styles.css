@@ -999,3 +999,8 @@ body.is-login .site-foot { display: none; }
 /* the tick on the "connected" note: white and bolder */
 .mt-av i { color: #fff; }
 .mt-av i svg.ms, .mt-av i svg.ms path { width: 12px; height: 12px; fill: #fff !important; stroke: #fff !important; stroke-width: 60; stroke-linejoin: round; }
+/* active service: the pill, and an x on the right to stop it */
+.active-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); }
+.end-btn { flex: none; width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border-radius: 50%; border: 1px solid rgba(47, 47, 47, .2); background: #fff; color: var(--charcoal); cursor: pointer; transition: background .15s var(--ease-out), color .15s var(--ease-out), border-color .15s var(--ease-out); }
+.end-btn svg { width: 20px; height: 20px; }
+.end-btn:hover { background: rgba(113, 19, 28, .06); border-color: #71131C; color: #71131C; }
