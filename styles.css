@@ -993,3 +993,6 @@ body.is-login .site-foot { display: none; }
 /* demo keys: a person popping onto the map */
 .map > svg .person.pop { transform-box: fill-box; transform-origin: center; animation: fam-pop .7s var(--ease-spring) backwards; }
 .map > svg .person.pop ~ .person.pop { animation-delay: .2s; }
+/* key C: the family's connections drawn in blue, drawing themselves in once */
+.map > svg .link.blue { stroke: var(--blue); stroke-width: 3; }
+.map > svg .link.blue.draw { stroke-dasharray: 1; vector-effect: none; stroke-width: 4; animation: fam-draw .9s var(--ease-out) backwards; animation-delay: calc(var(--i) * .15s); }

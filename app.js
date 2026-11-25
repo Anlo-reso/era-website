@@ -66,6 +66,11 @@
   let selected = null, selSvc = null;   // the person or the service you tapped
   // demo keys (0–3) on the Overview map: who is on the map right now (null = everyone) and who pops in next draw
   let demo = null, popIds = [];
+  // key C: the family's connections drawn as blue lines (pairs 'a|b'); drawBlue animates them once
+  let blueLinks = null, drawBlue = false;
+  // your line to Dad is always blue once you're connected; key C adds the rest
+  const isBlue = (a, b) => (isConnected('rosa') && [a, b].includes('giulia') && [a, b].includes('rosa'))
+    || (!!blueLinks && (blueLinks.includes(a + '|' + b) || blueLinks.includes(b + '|' + a)));
   const at = (k) => MAPP[k];
   // a gently bent line between two people: start, bend point, end
   function linkGeom(a, b) {
@@ -150,14 +155,14 @@
     const shown = (id) => !demo || demo.includes(id);
     // lines to people you are not connected with yet are still and dotted, with a question mark half-way
     const k2q = small ? 1.6 : 1 / z, dots = `stroke-dasharray:0 ${(8 * k2q).toFixed(1)};stroke-width:${(3.5 * k2q).toFixed(1)}`;
-    s += `<g class="links">${FAM_LINKS.filter(([a, b]) => shown(a) && shown(b)).map(([a, b], i) => { const nc = notYet(a, b);
-      return `<path class="link ${nc ? 'pending' : ''}" d="${link(a, b)}" ${nc ? `style="${dots}"` : `pathLength="1" style="--i:${i}"`}/>`; }).join('')}</g>`;
+    s += `<g class="links">${FAM_LINKS.filter(([a, b]) => shown(a) && shown(b)).map(([a, b], i) => { const bl = isBlue(a, b), nc = !bl && notYet(a, b);
+      return `<path class="link ${nc ? 'pending' : ''} ${bl ? 'hl blue' : ''} ${bl && drawBlue ? 'draw' : ''}" d="${link(a, b)}" ${nc ? `style="${dots}"` : `pathLength="1" style="--i:${i}"`}/>`; }).join('')}</g>`;
     // the route to the person you picked: drawn solid, or dotted while you are not connected yet
     if (selected && shown(selected)) {
       const d = routeTo(selected), nc = !isConnected(selected);
       if (d.trim()) s += nc ? `<path class="route pending" d="${d}" style="${dots}"/>` : `<path class="route" d="${d}" pathLength="1"/>`;
     }
-    s += FAM_LINKS.filter(([a, b]) => shown(a) && shown(b) && notYet(a, b)).map(([a, b]) => { const m = alongLink(a, b, 0.5), qr = 15 * k2q, qi = 18 * k2q;
+    s += FAM_LINKS.filter(([a, b]) => shown(a) && shown(b) && !isBlue(a, b) && notYet(a, b)).map(([a, b]) => { const m = alongLink(a, b, 0.5), qr = 15 * k2q, qi = 18 * k2q;
       return `<g class="route-q"><title>Not connected yet</title><circle cx="${m.x}" cy="${m.y}" r="${qr}"/><svg x="${m.x - qi / 2}" y="${m.y - qi / 2}" width="${qi}" height="${qi}" viewBox="0 -960 960 960" class="ms">${I.question}</svg></g>`; }).join('');
     // services on the lines: blue when active (opted in), white when not; the picked person's ones light up
     // by default (and when you pick yourself) no service is highlighted; picking someone else, or a service, lights theirs up
@@ -801,22 +806,33 @@
      2 = your brother and sister pop in · 3 = Dad accepts. A page refresh brings back the normal map. */
   function demoStep(n) {
     const was = demo || PEOPLE_ORDER;
-    selected = null; selSvc = null; history.replaceState(null, '', '#/family');
+    selected = null; selSvc = null; blueLinks = null; history.replaceState(null, '', '#/family');
     if (n === 0) { demo = ['giulia']; state.connected = ['giulia']; }
     if (n === 1) { demo = ['giulia', 'rosa']; state.connected = state.connected.filter((x) => x !== 'rosa'); }
     if (n === 2) { demo = [...new Set([...(demo || ['giulia', 'rosa']), 'marco', 'sofia'])]; }
     if (n === 3) { if (demo && !demo.includes('rosa')) demo = [...demo, 'rosa']; if (!isConnected('rosa')) state.connected.push('rosa'); }
     popIds = n === 1 ? ['rosa'] : (demo || []).filter((id) => !was.includes(id));   // who pops in this time
-    save(); refreshFamily(); focusOn(); popIds = [];
+    drawBlue = n === 3;   // Dad's line draws itself in blue when he accepts
+    save(); refreshFamily(); focusOn(); popIds = []; drawBlue = false;
+    setTimeout(() => $$('.link.draw').forEach((l) => l.classList.toggle('draw', false)), 1600);
     if (n === 1) mapToast('rosa', 'Connect request sent to <b>Dad</b>');
     if (n === 2) mapToast('marco', '<b>Marco</b> and <b>Sofia</b> joined the family map');
     if (n === 3) mapToast('rosa', '<b>Dad</b> accepted your request. You are now connected');
   }
+  // C: everyone on the map, with blue lines you–Dad, brother–Dad, sister–Dad and you–sister
+  function showConnections() {
+    selected = null; selSvc = null; demo = null; history.replaceState(null, '', '#/family');
+    blueLinks = ['giulia|rosa', 'marco|rosa', 'sofia|rosa', 'giulia|sofia'];
+    ['rosa', 'sofia'].forEach((id) => { if (!isConnected(id)) state.connected.push(id); });
+    drawBlue = true; save(); refreshFamily(); focusOn(); drawBlue = false;
+    setTimeout(() => $$('.link.draw').forEach((l) => l.classList.toggle('draw', false)), 1600);   // then the crisp 3px line
+  }
   document.addEventListener('keydown', (e) => {
-    if (!/^[0-3]$/.test(e.key) || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+    const k = e.key.toLowerCase();
+    if (!/^[0-3c]$/.test(k) || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) return;
     if (!$('#map') || !location.hash.startsWith('#/family')) return;
-    e.preventDefault(); demoStep(Number(e.key));
+    e.preventDefault(); if (k === 'c') showConnections(); else demoStep(Number(k));
   });
 
   document.addEventListener('toggle', (e) => { const t = e.target.dataset && e.target.dataset.topic; if (t !== undefined) { const n = Number(t); if (e.target.open) prepOpen.add(n); else prepOpen.delete(n); } }, true);
