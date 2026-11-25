@@ -902,7 +902,7 @@ svg.ms, svg.ms path { fill: currentColor !important; stroke: none !important; }
    round — only faces, icon circles, small status tags and the location pills */
 :root { --r: 12px; --r-lg: 24px; }
 .btn, .top .urgent, .top .nav .nav-search, .top .textsize, .q, .sugg .q,
-.ask form, .fam-map .ask form, .ask-bar, .svc-search, .join-form input, .join-btn,
+.ask form, .fam-map .ask form, .svc-map .ask form, .ask-bar, .svc-search, .join-form input, .join-btn,
 .connect, .view-btn, .ask-btn, .pill, .sugg-btn, .skip, .tabbar a,
 .it, .fam-side .it, .ptopic, .ptopic summary, .active, .empty, .dlg-cols section,
 .profile2 .banner, .svc2-img, .bot, .fam-map .bot, .svc-map .bot { border-radius: var(--r); }
