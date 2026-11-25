@@ -211,7 +211,7 @@
         </div>
         <div class="map-toast" id="mapToast" role="status" aria-live="polite"></div>
         <div class="ask">
-          <span class="bot" aria-hidden="true"><img src="assets/ui/assistant.svg" width="73" height="73" alt=""></span>
+          <span class="bot" aria-hidden="true"><img src="assets/ui/assistant.svg" width="64" height="64" alt=""></span>
           <form data-ask>
             <label class="sr-only" for="ask">Ask era</label>
             <input id="ask" type="text" placeholder="how can I help you?" autocomplete="off">
@@ -579,7 +579,7 @@
     { id: 'drive', img: 'assets/services/driving-service.webp', cat: 'transport', icon: 'car', name: 'Driving service', who: 'Bus Amico', cost: 'Free', what: 'Volunteer drivers to the doctor and hospital.', dist: '1.1 km', walk: '4 min by car', x: 600, y: 560 },
     { id: 'assist', img: 'assets/services/daily-care.webp', cat: 'home', icon: 'hand', name: 'Daily care assistant', who: 'Casa Serena', cost: 'Partly funded', what: 'Help with shopping, cleaning and medicines.', dist: '900 m', walk: '12 min walk', x: 220, y: 640 },
     { id: 'funding', img: 'assets/services/home-adjustments.webp', cat: 'funding', icon: 'home', name: 'Home adjustments', who: 'Social services', cost: 'Free advice', what: 'Advice and money for grab rails and showers.', dist: '1.6 km', walk: '6 min by car', x: 640, y: 220 },
-    { id: 'pharmacy', img: 'assets/services/pharmacy-delivery.webp', cat: 'health', icon: 'cross', name: 'Pharmacy delivery', who: 'Farmacia del Borgo', cost: 'Free delivery 65+', what: 'Medicines delivered to Andrea\'s door.', dist: '300 m', walk: '4 min walk', x: 470, y: 330 },
+    { id: 'pharmacy', img: 'assets/services/pharmacy-delivery.webp', cat: 'health', icon: 'cross', name: 'Pharmacy delivery', who: 'Farmacia del Borgo', cost: 'Free delivery 65+', what: 'Medicines delivered to the door.', dist: '300 m', walk: '4 min walk', x: 470, y: 330 },
   ];
   let svcQuery = '', svcSel = null;
   const isActive = (id) => SERVICE_DONE[id] && state.active.some((a) => a.text === SERVICE_DONE[id].text);
@@ -591,13 +591,20 @@
     <div class="svc-page">
       <div class="svc-left">
         <div class="svc-head"><h1 class="h1">Care made easy with us</h1>
-          <p class="lead">Help close to Andrea's home in Bergamo. Ask with one click — era sends the request and keeps the family up to date.</p></div>
+          <p class="lead">Find help for Andrea, for you, or anyone in your family. era keeps the family connected and up to date.</p></div>
         <label class="svc-search">${icon('search')}<span class="sr-only">Search services</span>
           <input id="svcSearch" type="search" placeholder="Search for help, e.g. &quot;lunch&quot; or &quot;shower&quot;" value="${esc(svcQuery)}" autocomplete="off"></label>
         <div class="svc-grid" id="svcGrid"></div>
       </div>
       <div class="svc-map"><div id="svcMap"></div>
-        <a class="map-tip" href="#/steps" data-q="How can Andrea keep living at home?">${BOT_FACE('small')}<span><b>Not sure what Andrea needs?</b><br>Ask era — it suggests services that fit his day.</span></a>
+        <div class="ask">
+          <span class="bot" aria-hidden="true"><img src="assets/ui/assistant.svg" width="64" height="64" alt=""></span>
+          <form data-ask>
+            <label class="sr-only" for="svcAsk">Ask era</label>
+            <input id="svcAsk" type="text" placeholder="how can I help you?" autocomplete="off">
+            <button class="send" type="submit" aria-label="Ask"><img src="assets/ui/send.svg?v=2" width="45" height="45" alt=""></button>
+          </form>
+        </div>
       </div>
     </div>`;
   }

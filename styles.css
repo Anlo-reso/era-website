@@ -433,12 +433,8 @@ body.is-login main { padding: 0; }
 #svcMap .m-home-l rect { fill: #fff; }
 #svcMap .m-home-l text { fill: var(--charcoal); font: 500 14px var(--font); }
 #svcMap .m-ico-b path { fill: none; stroke: var(--blue); stroke-width: 2; }
-.map-tip { position: absolute; left: 16px; right: 16px; bottom: 16px; max-width: 420px; display: flex; gap: var(--s-3); align-items: center; background: #fff; border-radius: var(--r); padding: 14px 16px; text-decoration: none; color: rgba(47, 47, 47, .7); font-size: var(--t-small); }
-.map-tip b { color: var(--charcoal); font-weight: 500; font-size: var(--t-ui); }
-.map-tip:hover { box-shadow: 0 0 0 2px var(--blue); }
 .bot-face { width: 56px; height: 56px; flex: none; }
 .bot-face.small { width: 40px; height: 40px; }
-.map-tip .bot-face { border-radius: 8px; box-shadow: 0 0 0 1px #E8E6E7; }
 
 /* ===== Chat page (Figma "Chatbot – Your steps") ===== */
 .chat-page { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 30%); gap: var(--s-7); padding-top: 12px; align-items: start; }
@@ -514,7 +510,7 @@ body.is-login main { padding: 0; }
   .convo-head, .log, .convo-foot { padding-left: 16px; padding-right: 16px; }
   .m { max-width: 90%; }
   .svc-map { height: 340px; border-radius: 24px; }
-  .map-tip { display: none; }
+  .svc-map .ask { display: none; }
 }
 @media (max-width: 767px) { .sugg { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 0 16px; } .sugg .q { flex: none; } .convo-head .knows i:nth-child(n+4) { display: none; } }
 
@@ -707,17 +703,17 @@ svg.ms, svg.ms path { fill: currentColor !important; stroke: none !important; }
 .fam-side .it .new { font-size: 11px; padding: 2px 8px; line-height: 1.35; }
 
 /* the assistant, bottom-left on the panel */
-.fam-map .ask { left: 24px; bottom: 24px; gap: var(--s-5); width: auto; min-width: 0; }
-.fam-map .bot { position: relative; display: block; width: 73px; height: 73px; border-radius: 15px; background: #fff; box-shadow: none; }
-.fam-map .bot::after { display: none; }
-.fam-map .bot img { display: block; width: 100%; height: 100%; }
-.fam-map .ask form { flex: none; width: 245px; height: 64px; padding: 0 9.5px 0 20px; border-radius: 99px; background: #fff; box-shadow: none; display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); }
-.fam-map .ask form:focus-within { box-shadow: 0 0 0 2px var(--blue); }
-.fam-map .ask input { font-size: var(--t-ui); min-height: 0; color: var(--charcoal); }
-.fam-map .ask input::placeholder { color: rgba(47, 47, 47, .7); }
-.fam-map .send { flex: none; width: 45px; height: 45px; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; }
-.fam-map .send img { display: block; }
-.fam-map .send:hover { filter: brightness(.92); }
+.fam-map .ask, .svc-map .ask { left: 24px; bottom: 24px; gap: var(--s-5); width: auto; min-width: 0; }
+.fam-map .bot, .svc-map .bot { position: relative; display: block; width: 64px; height: 64px; border-radius: 15px; background: #fff; box-shadow: none; }
+.fam-map .bot::after, .svc-map .bot::after { display: none; }
+.fam-map .bot img, .svc-map .bot img { display: block; width: 100%; height: 100%; }
+.fam-map .ask form, .svc-map .ask form { flex: none; width: 245px; height: 64px; padding: 0 9.5px 0 20px; border-radius: 99px; background: #fff; box-shadow: none; display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); }
+.fam-map .ask form:focus-within, .svc-map .ask form:focus-within { box-shadow: 0 0 0 2px var(--blue); }
+.fam-map .ask input, .svc-map .ask input { font-size: var(--t-ui); min-height: 0; color: var(--charcoal); }
+.fam-map .ask input::placeholder, .svc-map .ask input::placeholder { color: rgba(47, 47, 47, .7); }
+.fam-map .send, .svc-map .send { flex: none; width: 45px; height: 45px; padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; }
+.fam-map .send img, .svc-map .send img { display: block; }
+.fam-map .send:hover, .svc-map .send:hover { filter: brightness(.92); }
 
 @media (max-width: 1023px) {
   .fam { height: auto; min-height: 0; }
@@ -909,7 +905,7 @@ svg.ms, svg.ms path { fill: currentColor !important; stroke: none !important; }
 .ask form, .fam-map .ask form, .ask-bar, .svc-search, .join-form input, .join-btn,
 .connect, .view-btn, .ask-btn, .pill, .sugg-btn, .skip, .tabbar a,
 .it, .fam-side .it, .ptopic, .ptopic summary, .active, .empty, .dlg-cols section,
-.profile2 .banner, .svc2-img, .bot, .fam-map .bot, .map-tip { border-radius: var(--r); }
+.profile2 .banner, .svc2-img, .bot, .fam-map .bot, .svc-map .bot { border-radius: var(--r); }
 .card, .list-card, .fam-side .list-card, .fam-side .profile2, .svc2, .svc-map, .fam-map, .convo,
 dialog, .connect-dlg, .person-card, .tabbar { border-radius: var(--r-lg); }
 @media (max-width: 1023px) { .map, .fam-map .map, .svc-map { border-radius: var(--r-lg); } .fam-map { border-radius: 0; } }
@@ -991,3 +987,6 @@ body.is-login .site-foot { display: none; }
 .btn-line, .view-btn, .ask-btn, .pill-line { border: 1px solid rgba(47, 47, 47, .2); }
 .btn-dark, .connect, .pill-blue, .join-btn { border: 1px solid transparent; }
 .connect b { font-weight: 600; }
+
+/* the assistant bar on the Services map sits bottom-left, like on the Overview map */
+.svc-map .ask { position: absolute; z-index: 2; width: auto; min-width: 0; }

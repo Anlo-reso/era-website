@@ -156,7 +156,6 @@ html[data-ui="new"] .svc2.is-sel { background: var(--era-blue-tint); border: 2px
 html[data-ui="new"] .svc2-img { aspect-ratio: 2 / 1; }
 html[data-ui="new"] .svc-search { border-radius: var(--radius-s); border: var(--border); background: #fff; min-height: 52px; }
 html[data-ui="new"] .svc-search input { font-size: var(--fs-body); }
-html[data-ui="new"] .map-tip { border-radius: var(--radius-m); box-shadow: var(--shadow-float); }
 
 /* ---------- chat bar: white, Mist border, pill, 52px, round era Blue Deep send ---------- */
 html[data-ui="new"] .fam-map .ask form, html[data-ui="new"] .ask-bar, html[data-ui="new"] .ask form {
