@@ -1017,3 +1017,15 @@ body.is-login .site-foot { display: none; }
 /* service cards: a little less inner padding, a little more room between cards */
 .svc2 { padding: 20px; }
 .svc-grid { gap: var(--s-5); }
+/* partner insurers as wordmarks in their brand colours, like the Allianz lockup (text, not logo files) */
+.ft-insurers li { padding: 8px 14px; }
+.ft-insurers li b { font-weight: 700; font-size: .95rem; letter-spacing: -.01em; }
+.ins-generali b { color: #C21B17; font-family: Georgia, 'Times New Roman', serif; font-weight: 700; }
+.ins-unipol b { color: #003C7D; }
+.ins-reale b { color: #00305E; }
+.ins-poste b { color: #0047BB; }
+.ins-ergo b { color: #BF1528; letter-spacing: .04em; }
+.ins-huk b { color: #003A70; }
+.ins-debeka b { color: #005CA9; }
+.ins-rv b { color: #003D7C; }
+.ins-allianz b { color: #003781; }
