@@ -1009,3 +1009,11 @@ body.is-login .site-foot { display: none; }
 .ft-insurers { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--s-2); max-width: 340px; }
 .ft-insurers li { padding: 6px 12px; border: 1px solid #E8E6E7; border-radius: var(--r); font-size: var(--t-small); font-weight: 500; color: var(--charcoal); white-space: nowrap; }
 .ft-insurers li span { margin-left: 4px; font-size: .7rem; font-weight: 400; color: rgba(47, 47, 47, .5); letter-spacing: .04em; }
+/* a selected service card is filled with a light era Blue tint */
+.svc2.is-sel { background: rgba(91, 117, 254, .08); }
+.svc2.is-sel .active-pill { background: #fff; }
+/* service card subtitle in grey, under the charcoal title */
+.svc2 .what { color: rgba(47, 47, 47, .7); }
+/* service cards: a little less inner padding, a little more room between cards */
+.svc2 { padding: 20px; }
+.svc-grid { gap: var(--s-5); }
