@@ -990,3 +990,6 @@ body.is-login .site-foot { display: none; }
 
 /* the assistant bar on the Services map sits bottom-left, like on the Overview map */
 .svc-map .ask { position: absolute; z-index: 2; width: auto; min-width: 0; }
+/* demo keys: a person popping onto the map */
+.map > svg .person.pop { transform-box: fill-box; transform-origin: center; animation: fam-pop .7s var(--ease-spring) backwards; }
+.map > svg .person.pop ~ .person.pop { animation-delay: .2s; }

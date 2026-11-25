@@ -33,7 +33,7 @@
     rosa:   { name: 'Andrea', role: 'Dad',           full: 'Andrea Balloni', born: '14.03.1955', photo: 'assets/people/andrea.jpg' },
     giulia: { name: 'Isa',    role: 'You',           full: 'Isa Balloni',    born: '02.04.1975', photo: 'assets/people/giulia.jpg' },
     marco:  { name: 'Marco',  role: 'Brother',       full: 'Marco Balloni',   born: '19.07.1972', photo: 'assets/people/marco.jpg' },
-    sofia:  { name: 'Sofia',  role: 'Granddaughter', full: 'Sofia Rossi',   born: '30.01.2005', photo: 'assets/people/sofia.jpg' },
+    sofia:  { name: 'Sofia',  role: 'Sister',        full: 'Sofia Balloni', born: '30.01.1980', photo: 'assets/people/sofia.jpg' },
   };
   const SERVICE_DONE = {
     food: { soon: 'tomorrow 12:00', text: 'Lunch delivery — Pranzo a Casa', when: 'Every day at 12:00 · starts tomorrow', toast: 'Lunch is ordered for Andrea. It arrives tomorrow at 12:00.' },
@@ -64,6 +64,8 @@
     funding: { name: 'Home adjustments', icon: 'home', at: { x: -150, y: -470 }, people: ['marco', 'rosa'] },
   };
   let selected = null, selSvc = null;   // the person or the service you tapped
+  // demo keys (0–3) on the Overview map: who is on the map right now (null = everyone) and who pops in next draw
+  let demo = null, popIds = [];
   const at = (k) => MAPP[k];
   // a gently bent line between two people: start, bend point, end
   function linkGeom(a, b) {
@@ -145,22 +147,24 @@
     const z = mapZ(), u = (px) => px / z;           // text sizes in screen pixels, whatever the map's scale
     const ns = u(small ? 13 : 16), ls = u(12.5), ss = u(11.5);
     let s = CITY_FILL + CITY_BG;
+    const shown = (id) => !demo || demo.includes(id);
     // lines to people you are not connected with yet are still and dotted, with a question mark half-way
     const k2q = small ? 1.6 : 1 / z, dots = `stroke-dasharray:0 ${(8 * k2q).toFixed(1)};stroke-width:${(3.5 * k2q).toFixed(1)}`;
-    s += `<g class="links">${FAM_LINKS.map(([a, b], i) => { const nc = notYet(a, b);
+    s += `<g class="links">${FAM_LINKS.filter(([a, b]) => shown(a) && shown(b)).map(([a, b], i) => { const nc = notYet(a, b);
       return `<path class="link ${nc ? 'pending' : ''}" d="${link(a, b)}" ${nc ? `style="${dots}"` : `pathLength="1" style="--i:${i}"`}/>`; }).join('')}</g>`;
     // the route to the person you picked: drawn solid, or dotted while you are not connected yet
-    if (selected) {
+    if (selected && shown(selected)) {
       const d = routeTo(selected), nc = !isConnected(selected);
       if (d.trim()) s += nc ? `<path class="route pending" d="${d}" style="${dots}"/>` : `<path class="route" d="${d}" pathLength="1"/>`;
     }
-    s += FAM_LINKS.filter(([a, b]) => notYet(a, b)).map(([a, b]) => { const m = alongLink(a, b, 0.5), qr = 15 * k2q, qi = 18 * k2q;
+    s += FAM_LINKS.filter(([a, b]) => shown(a) && shown(b) && notYet(a, b)).map(([a, b]) => { const m = alongLink(a, b, 0.5), qr = 15 * k2q, qi = 18 * k2q;
       return `<g class="route-q"><title>Not connected yet</title><circle cx="${m.x}" cy="${m.y}" r="${qr}"/><svg x="${m.x - qi / 2}" y="${m.y - qi / 2}" width="${qi}" height="${qi}" viewBox="0 -960 960 960" class="ms">${I.question}</svg></g>`; }).join('');
     // services on the lines: blue when active (opted in), white when not; the picked person's ones light up
     // by default (and when you pick yourself) no service is highlighted; picking someone else, or a service, lights theirs up
     const mine = selSvc ? [selSvc] : selected && selected !== 'giulia' ? svcOf(selected) : [];
     let tags = '';   // names, drawn last so nothing covers them; shown on hover or keyboard focus
-    s += Object.entries(MAP_SVC).map(([k, v]) => {
+    // in the demo, Dad's services only show once he has accepted your request
+    s += Object.entries(demo && !isConnected('rosa') ? {} : MAP_SVC).map(([k, v]) => {
       const { x, y } = v.at, hl = mine.includes(k), on = hl && isActive(k), dim = mine.length > 0 && !hl;
       const k2 = small ? 1.6 : 1 / z;   // on phones the map is tiny, so services scale with the faces instead of staying a fixed pixel size
       const r = (hl ? 21 : 18) * k2, ic = (hl ? 22 : 19) * k2, label = `${v.name}${on ? ' · Active' : ''}`, fs = u(12), lw = textW(label, fs) + fs * 1.8, lh = fs * 2;
@@ -173,14 +177,14 @@
       </g>`;
     }).join('');
     const defs = Object.entries(MAPP).map(([id, p]) => `<clipPath id="clip-${id}"><circle cx="${p.x}" cy="${p.y}" r="${p.r}"/></clipPath>`).join('');
-    s += PEOPLE_ORDER.slice().reverse().map((id) => {
+    s += PEOPLE_ORDER.slice().reverse().filter(shown).map((id) => {
       const p = MAPP[id], who = PEOPLE[id], you = id === 'giulia';
       const mf = prepScore(id), mR = p.r + 6 + u(7), mw = u(5);
       const ly = p.y + p.r + (you ? 22 : 14) + ns + u(12);
       const pinW = textW(p.where, ls) + ls * 2.9, pinH = ls * 2, py = p.y - p.r - 6 - u(10) - pinH, pc = py + pinH / 2, ic = ls * 1.25;   // above the face
       const px = p.x - pinW / 2 + ls * 0.7;
       return `
-      <g class="person ${selected === id ? 'sel' : ''} ${you ? 'is-you' : ''}" data-person="${id}" role="button" tabindex="0" style="--i:${PEOPLE_ORDER.indexOf(id)}" aria-pressed="${selected === id}" aria-label="${you ? 'You' : `${esc(who.name)}, ${esc(who.role)}`}, ${esc(p.where)}, ${id === 'rosa' ? 'family' : ''} preparedness ${pct(mf)}. Show details">
+      <g class="person ${selected === id ? 'sel' : ''} ${you ? 'is-you' : ''} ${popIds.includes(id) ? 'pop' : ''}" data-person="${id}" role="button" tabindex="0" style="--i:${PEOPLE_ORDER.indexOf(id)}" aria-pressed="${selected === id}" aria-label="${you ? 'You' : `${esc(who.name)}, ${esc(who.role)}`}, ${esc(p.where)}, ${id === 'rosa' ? 'family' : ''} preparedness ${pct(mf)}. Show details">
         ${selected === id || (you && !selected) ? `<circle class="sel-ring" cx="${p.x}" cy="${p.y}" r="${p.r + 6}"/>` : ''}
         <circle class="halo" cx="${p.x}" cy="${p.y}" r="${p.r + 16}"/><circle class="edge" cx="${p.x}" cy="${p.y}" r="${p.r + 1}"/>
         ${who.photo
@@ -232,7 +236,7 @@
     ['November', 'Thu 26', 'Dr. Ferri (GP) — check-up, 10:00', 'You go with Andrea'],
     ['December', 'Fri 4', 'Notary — power of attorney, 15:00', 'Marco goes with Andrea'],
     ['December', 'Tue 8', 'Cardiologist — heart check, 9:30', 'Andrea'],
-    ['December', 'Every Wed', 'Sofia visits Nonno', 'Tech help with the phone'],
+    ['December', 'Every Wed', 'Sofia visits Dad', 'Tech help with the phone'],
   ];
   function overview() {
     const months = [...new Set(EVENTS.map((e) => e[0]))];
@@ -249,12 +253,12 @@
   // Person card, as on the Figma board:
   //  · connected   → banner, name, relation, address, upcoming appointments, important documents, (sharing), "View details"
   //  · not yet     → banner, name, relation, address, sharing, big "Connect with brother Marco" → pop-up → "now connected"
-  const REL = { rosa: ['Your father', 'dad'], giulia: ['You', ''], marco: ['Your brother', 'brother'], sofia: ["Andrea's granddaughter", ''] };
+  const REL = { rosa: ['Your father', 'dad'], giulia: ['You', ''], marco: ['Your brother', 'brother'], sofia: ['Your sister', 'sister'] };
   const ADDR = { rosa: 'Via Pignolo 12, Bergamo · 50 min from you', giulia: 'Milano · your home', marco: 'Via Tasso 8, Bergamo · 50 min from you', sofia: 'Bergamo · 55 min from you' };
   const SHARE = { rosa: ['giulia', 'marco'], giulia: ['rosa', 'marco'], marco: ['sofia', 'giulia'], sofia: ['rosa', 'giulia'] };
   const FOCUS = { rosa: '50% 42%', giulia: '50% 38%', marco: '50% 30%', sofia: '50% 62%' }; // where the face sits in each photo
   const INSURED = { rosa: true, giulia: true, marco: true, sofia: true };
-  const APPTS = { rosa: [['Tue 8 Dec', 'Cardiologist, 9:30'], ['Thu 26 Nov', 'Dr. Ferri (GP), 10:00']], giulia: [['Thu 26 Nov', 'Goes with Andrea to Dr. Ferri']], marco: [['Tue 8 Dec', 'Cardiologist, 9:30'], ['Thu 26 Nov', 'Dr. Ferri (GP), 10:00']], sofia: [['Every Wed', 'Visits Nonno · tech help']] };
+  const APPTS = { rosa: [['Tue 8 Dec', 'Cardiologist, 9:30'], ['Thu 26 Nov', 'Dr. Ferri (GP), 10:00']], giulia: [['Thu 26 Nov', 'Goes with Andrea to Dr. Ferri']], marco: [['Tue 8 Dec', 'Cardiologist, 9:30'], ['Thu 26 Nov', 'Dr. Ferri (GP), 10:00']], sofia: [['Every Wed', 'Visits Dad · tech help']] };
   const DOCS_FULL = ['Health insurance card', 'Medical Prescription', 'Living will', 'Report • Doctor’s appointment • 12/12/10'];
   const DOCS = { rosa: DOCS_FULL, giulia: ['Health insurance card'], marco: DOCS_FULL, sofia: ['Health insurance card'] };
   // silent reset: every refresh starts with only Andrea (and you) connected, so the connect demo can be shown again
@@ -416,9 +420,9 @@
     dlg.showModal();
   }
   let mtt;
-  function mapToast(id) {
+  function mapToast(id, html) {
     const t = $('#mapToast'); if (!t) return;
-    t.innerHTML = `<span class="mt-av">${mini(id)}<i>${icon('check')}</i></span><span>${esc(REL[id][0])} <b>${esc(PEOPLE[id].name)}</b> is now connected</span>`;
+    t.innerHTML = `<span class="mt-av">${mini(id)}<i>${icon('check')}</i></span><span>${html || `${esc(REL[id][0])} <b>${esc(PEOPLE[id].name)}</b> is now connected`}</span>`;
     t.classList.add('show'); clearTimeout(mtt); mtt = setTimeout(() => t.classList.remove('show'), 4200);
   }
 
@@ -791,6 +795,28 @@
     if (e.key.toLowerCase() !== 'r' || e.repeat || e.metaKey || e.ctrlKey || e.altKey || !$('#intro')) return;
     if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) return;
     e.preventDefault(); playIntro();
+  });
+
+  /* demo keys on the Overview map (not while typing): 0 = only you · 1 = Dad appears, request sent ·
+     2 = your brother and sister pop in · 3 = Dad accepts. A page refresh brings back the normal map. */
+  function demoStep(n) {
+    const was = demo || PEOPLE_ORDER;
+    selected = null; selSvc = null; history.replaceState(null, '', '#/family');
+    if (n === 0) { demo = ['giulia']; state.connected = ['giulia']; }
+    if (n === 1) { demo = ['giulia', 'rosa']; state.connected = state.connected.filter((x) => x !== 'rosa'); }
+    if (n === 2) { demo = [...new Set([...(demo || ['giulia', 'rosa']), 'marco', 'sofia'])]; }
+    if (n === 3) { if (demo && !demo.includes('rosa')) demo = [...demo, 'rosa']; if (!isConnected('rosa')) state.connected.push('rosa'); }
+    popIds = n === 1 ? ['rosa'] : (demo || []).filter((id) => !was.includes(id));   // who pops in this time
+    save(); refreshFamily(); focusOn(); popIds = [];
+    if (n === 1) mapToast('rosa', 'Connect request sent to <b>Dad</b>');
+    if (n === 2) mapToast('marco', '<b>Marco</b> and <b>Sofia</b> joined the family map');
+    if (n === 3) mapToast('rosa', '<b>Dad</b> accepted your request. You are now connected');
+  }
+  document.addEventListener('keydown', (e) => {
+    if (!/^[0-3]$/.test(e.key) || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) return;
+    if (!$('#map') || !location.hash.startsWith('#/family')) return;
+    e.preventDefault(); demoStep(Number(e.key));
   });
 
   document.addEventListener('toggle', (e) => { const t = e.target.dataset && e.target.dataset.topic; if (t !== undefined) { const n = Number(t); if (e.target.open) prepOpen.add(n); else prepOpen.delete(n); } }, true);
