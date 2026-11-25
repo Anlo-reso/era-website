@@ -996,3 +996,6 @@ body.is-login .site-foot { display: none; }
 /* key C: the family's connections drawn in blue, drawing themselves in once */
 .map > svg .link.blue { stroke: var(--blue); stroke-width: 3; }
 .map > svg .link.blue.draw { stroke-dasharray: 1; vector-effect: none; stroke-width: 4; animation: fam-draw .9s var(--ease-out) backwards; animation-delay: calc(var(--i) * .15s); }
+/* the tick on the "connected" note: white and bolder */
+.mt-av i { color: #fff; }
+.mt-av i svg.ms, .mt-av i svg.ms path { width: 12px; height: 12px; fill: #fff !important; stroke: #fff !important; stroke-width: 60; stroke-linejoin: round; }
